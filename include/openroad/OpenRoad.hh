@@ -39,6 +39,10 @@ namespace FastRoute {
 class FastRouteKernel;
 }
 
+namespace tool {
+class Tool;
+}
+
 namespace opendp {
 class opendp_external;
 }
@@ -66,6 +70,7 @@ public:
   sta::Resizer *getResizer() { return resizer_; }
   dbVerilogNetwork *getVerilogNetwork() { return verilog_network_; }
   opendp::opendp_external *getOpendp() { return opendp_; }
+  tool::Tool *getTool(){ return tool_; }
 
   void readLef(const char *filename,
 	       const char *lib_name,
@@ -94,6 +99,7 @@ private:
   opendp::opendp_external *opendp_;
   pdngen::PdnGen *pdngen_;
   FastRoute::FastRouteKernel *fastRoute_;
+  tool::Tool *tool_;
 
   // Singleton used by tcl command interpreter.
   static OpenRoad *openroad_;
