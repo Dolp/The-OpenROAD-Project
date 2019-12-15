@@ -50,7 +50,7 @@ Tool::init(Tcl_Interp *tcl_interp,
 }
 
 void
-Tool::run(const char *pos_arg1)
+Tool::toolize(const char *pos_arg1)
 {
   printf("Gotta pos_arg1 %s\n", pos_arg1);
   printf("Gotta param1 %f\n", param1_);

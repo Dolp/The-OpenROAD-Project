@@ -26,11 +26,11 @@ proc tool_helper { } {
 }
 
 # Example usage:
-#  tool_frobulator foo
-#  tool_frobulator -flag1 -key1 2.0 bar
-#  help tool_frobulator
-proc tool_frobulator { args } {
-  sta::parse_key_args "run_tool" args \
+#  toolize foo
+#  toolize -flag1 -key1 2.0 bar
+#  help toolize
+proc toolize { args } {
+  sta::parse_key_args "toolize" args \
     keys {-key1} flags {-flag1}
 
   if { [info exists keys(-key1)] } {
@@ -41,7 +41,7 @@ proc tool_frobulator { args } {
 
   tool::tool_set_flag1 [info exists flags(-flag1)]
 
-  sta::check_argc_eq1 "run_tool" $args
+  sta::check_argc_eq1 "toolize" $args
   tool::tool_helper
-  tool::tool_frobulate [lindex $args 0]
+  tool::toolize [lindex $args 0]
 }

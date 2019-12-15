@@ -43,9 +43,9 @@ tool_set_flag1(bool flag1)
 }
 
 void
-tool_frobulate(const char *pos_arg1)
+toolize(const char *pos_arg1)
 {
-  getTool()->run(pos_arg1);
+  getTool()->toolize(pos_arg1);
 }
 
 %} // inline
