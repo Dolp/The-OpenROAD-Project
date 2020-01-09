@@ -1677,8 +1677,33 @@ proc apply_pdn {config verbose} {
   plan_grid
   opendb_update_grid
 
+  # simple patch for gf14
+  update_via_param V2 setNumCutRows 1
+  update_via_param V2 setNumCutCols 4
+  update_via_param V2 setYTopEnclosure 34
+  update_via_param V2 setYBottomEnclosure 34
+
   if {$verbose} {
     puts "Total walltime to generate PDN DEF = [expr {[expr {[clock clicks -milliseconds] - $::start_time}]/1000.0}] seconds"
+  }
+}
+
+proc update_via_param { layer_name func_name val } {
+  set block [[[::ord::get_db] getChip] getBlock]
+  set vias [$block getVias]
+  foreach via $vias {
+    set via_param [$via getViaParams]
+    set cut_layer [$via_param getCutLayer]
+    
+    if { [$cut_layer getConstName] != $layer_name } {
+      continue
+    }
+
+    $via_param $func_name $val
+    $via setViaParams $via_param
+
+    puts "$func_name $val updatd on $layer_name via"
+    break
   }
 }
 
