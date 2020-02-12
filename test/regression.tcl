@@ -13,16 +13,51 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-# This is a generic test script used by the "regression" and "save_ok" scripts.
-# You should NOT need to modify it.
-# Customization is done by modifying "regression_vars.tcl".
+# This is a generic regression test script used to compare application 
+# output to a known good "ok" file.
+# 
+# Use the "regression" command to run the regressions.
+#
+#  regression -help | [-valgrind] test1 [test2...]
+#
+# where test is "all" or the name of a test group defined in regression_vars.tcl
+# Wildcards can be used in test names if the name is enclosed in ""s to suppress
+# shell globbing. For example,
+#
+#  regression "init_floorplan*"
+# 
+# will run all tests with names that begin with "init_floorplan".
+# Each test name is printed before it runs. Once it finishes pass,
+# fail, *NO OK FILE* or *SEG FAULT* is printed after the test name.
+#
+# The results of each test are in the file test/results/<test>.log
+# The diffs for all tests are in test/results/diffs.
+# A list of failed tests is in test/results/failures.
+# To save a log file as the correct output use the save_ok command.
+#
+#  save_ok failures | test1 [test2...]
+#
+# This copies test/results/test.log to test/test.ok
+# Using the test name 'failures' copies the ok files for all failed tests.
+# This is a quick way to update the failing test ok files after examining
+# the differences.
+#
+# You should NOT need to modify this script.
+# To setup the regression script customize the scripts "regresssion" and "save_ok"
+# to source "regression_vars.tcl" and "regression.tcl" as in this example.
+# Customize "regression_vars.tcl" to locate the directory and name of the
+# application to run as well as the test names. Each test is a tcl command file.
 
 proc regression_main {} {
+  exit [regression_body]
+}
+
+proc regression_body {} {
   setup
   parse_args
   run_tests
   show_summary
-  exit [found_errors]
+  return [found_errors]
 }
 
 proc setup {} {
@@ -59,7 +94,7 @@ proc parse_args {} {
   while { $argv != {} } {
     set arg [lindex $argv 0]
     if { $arg == "help" || $arg == "-help" } {
-      puts {Usage: regression [-help] [-threads threads]  [-valgrind] tests...}
+      puts {Usage: regression [-help] [-threads threads] [-valgrind] tests...}
       puts "  -threads max|integer - number of threads to use"
       puts "  -valgrind - run valgrind (linux memory checker)"
       puts "  Wildcarding for test names is supported (enclose in \"'s)"
@@ -79,14 +114,16 @@ proc parse_args {} {
     } elseif { $arg == "-valgrind" } {
       set use_valgrind 1
       set argv [lrange $argv 1 end]
-    } elseif { [llength $argv] == 0 } {
-      # Default is to run dist tests.
-      set tests [group_tests dist]
     } else {
       break
     }
   }
-  set tests [expand_tests $argv]
+  if { $argv == {} } {
+    # Default is to run fast tests.
+    set tests [group_tests fast]
+  } else {
+    set tests [expand_tests $argv]
+  }
 }
 
 proc expand_tests { argv } {
@@ -275,15 +312,14 @@ proc run_test_valgrind { test cmd_file log_file } {
 
   set cmd [concat exec valgrind $valgrind_options \
 	     $app_path $app_options $vg_cmd_file >& $log_file]
+  set error_msg ""
   if { [catch $cmd] } {
-    set error [lindex $errorCode 3]
-    cleanse_valgrind_logfile $test $log_file
-    cleanse_logfile $test $log_file
-    return "ERROR $error"
-  } else {
-    cleanse_logfile $test $log_file
-    return [cleanse_valgrind_logfile $test $log_file]
+    set error_msg "ERROR [lindex $errorCode 3]"
   }
+  file delete $vg_cmd_file
+  cleanse_logfile $test $log_file
+  lappend error_msg [cleanse_valgrind_logfile $test $log_file]
+  return $error_msg
 }
 
 # Error messages can be found in "valgrind/memcheck/mc_errcontext.c".

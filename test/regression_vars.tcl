@@ -29,7 +29,6 @@ set diff_file [file join $result_dir "diffs"]
 # File containing list of failed tests.
 set failure_file [file join $result_dir "failures"]
 # Use the DIFF_OPTIONS envar to change the diff options
-# (Solaris diff doesn't support this envar)
 set diff_options "-c"
 if [info exists env(DIFF_OPTIONS)] {
   set diff_options $env(DIFF_OPTIONS)
@@ -46,6 +45,8 @@ proc cleanse_logfile { test log_file } {
 }
 
 ################################################################
+
+set test_groups(all) {}
 
 # Record a test in the regression suite.
 proc record_test { test cmd_dir } {
@@ -119,30 +120,11 @@ proc list_delete { list delete } {
 
 # Record tests in /test
 record_tests {
-  init_floorplan1
-  init_floorplan2
-  init_floorplan3
-  init_floorplan4
-  init_floorplan5
-  init_floorplan6
-  read_verilog1
-  read_verilog2
-  sdc_names1
-  sta1
-  sta2
-  sta3
-  sta4
-  sta5
-  write_verilog1
-  write_verilog2
-  write_verilog3
-  write_verilog4
 }
 #  gcd_flow1
 
 # Record tests in $STAX/designs
 record_test_design {
-  mea/mea_db_dcalc
 }
 
 ################################################################
@@ -152,7 +134,6 @@ record_test_design {
 # Medium speed tests.
 # run time <15s with optimized compile
 define_test_group med {
-  mea_db_dcalc
 }
 
 define_test_group slow {

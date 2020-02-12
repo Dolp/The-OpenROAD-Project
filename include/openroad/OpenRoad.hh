@@ -14,6 +14,8 @@
 #ifndef OPENROAD_H
 #define OPENROAD_H
 
+#include <string>
+
 extern "C" {
 struct Tcl_Interp;
 }
@@ -31,23 +33,52 @@ class Resizer;
 namespace pdngen {
 class PdnGen;
 }
+namespace ICeWall {
+class ICeWall;
+}
 namespace ioPlacer {
 class IOPlacementKernel;
+}
+
+namespace TritonCTS {
+class TritonCTSKernel;
 }
 
 namespace FastRoute {
 class FastRouteKernel;
 }
 
+namespace tapcell {
+    class Tapcell;
+}
+
+namespace opendp {
+class Opendp;
+}
+
+namespace psn {
+class Psn;
+}
+
+namespace MacroPlace {
+class TritonMacroPlace;
+}
+
+namespace replace {
+class Replace;
+}
+
+namespace OpenRCX {
+class Ext;
+}
+
 namespace tool {
 class Tool;
 }
 
-namespace opendp {
-class opendp_external;
-}
-
 namespace ord {
+
+using std::string;
 
 class dbVerilogNetwork;
 
@@ -59,17 +90,22 @@ public:
   ~OpenRoad();
   // Singleton accessor used by tcl command interpreter.
   static OpenRoad *openRoad() { return openroad_; }
-  void init(Tcl_Interp *tcl_interp,
-	    const char *prog_arg);
+  void init(Tcl_Interp *tcl_interp);
 
   Tcl_Interp *tclInterp() { return tcl_interp_; }
   pdngen::PdnGen *getPdnGen(){ return pdngen_; }
+  ICeWall::ICeWall *getICeWall(){ return ICeWall_; }
   odb::dbDatabase *getDb() { return db_; }
   sta::dbSta *getSta() { return sta_; }
   sta::dbNetwork *getDbNetwork();
   sta::Resizer *getResizer() { return resizer_; }
+  TritonCTS::TritonCTSKernel *getTritonCts() { return tritonCts_; } 
   dbVerilogNetwork *getVerilogNetwork() { return verilog_network_; }
-  opendp::opendp_external *getOpendp() { return opendp_; }
+  opendp::Opendp *getOpendp() { return opendp_; }
+  tapcell::Tapcell *getTapcell() { return tapcell_; }
+  MacroPlace::TritonMacroPlace *getTritonMp() { return tritonMp_; }
+  OpenRCX::Ext *getOpenRCX() { return extractor_; }
+  replace::Replace* getReplace() { return replace_; }
   tool::Tool *getTool(){ return tool_; }
 
   void readLef(const char *filename,
@@ -77,8 +113,11 @@ public:
 	       bool make_tech,
 	       bool make_library);
 
-  void readDef(const char *filename);
-  void writeDef(const char *filename);
+  void readDef(const char *filename,
+               bool order_wires);
+  void writeDef(const char *filename,
+		// major.minor (avoid including defout.h)
+		string version);
 
   void readVerilog(const char *filename);
   // Write a flat verilog netlist for the database.
@@ -96,9 +135,15 @@ private:
   sta::dbSta *sta_;
   sta::Resizer *resizer_;
   ioPlacer::IOPlacementKernel *ioPlacer_;
-  opendp::opendp_external *opendp_;
+  opendp::Opendp *opendp_;
+  MacroPlace::TritonMacroPlace *tritonMp_;
   pdngen::PdnGen *pdngen_;
+  ICeWall::ICeWall *ICeWall_;
   FastRoute::FastRouteKernel *fastRoute_;
+  TritonCTS::TritonCTSKernel *tritonCts_;
+  tapcell::Tapcell *tapcell_;
+  OpenRCX::Ext *extractor_;
+  replace::Replace *replace_;
   tool::Tool *tool_;
 
   // Singleton used by tcl command interpreter.

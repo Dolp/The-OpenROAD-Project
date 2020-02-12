@@ -1,9 +1,8 @@
 # exit on failure of any test line
+set -x
 set -e
-docker run -v $(pwd):/OpenROAD openroad/openroad bash -c "/OpenROAD/test/regression fast"
-docker run -v $(pwd):/OpenROAD openroad/openroad bash -c "/OpenROAD/src/pdngen/test/regression fast"
-docker run -v $(pwd):/OpenROAD openroad/openroad bash -c "/OpenROAD/src/resizer/test/regression fast"
-docker run -v $(pwd):/OpenROAD openroad/openroad bash -c "/OpenROAD/src/opendp/test/regression fast"
-docker run -v $(pwd):/OpenROAD openroad/openroad bash -c "cd /OpenROAD/src/replace/test && python3 regression.py run openroad"
-docker run -v $(pwd):/OpenROAD openroad/openroad bash -c "cd /OpenROAD && cp etc/PO* . && tclsh ./src/FastRoute/tests/run_all.tcl"
-docker run -v $(pwd):/OpenROAD openroad/openroad bash -c "/OpenROAD/src/tool/test/regression fast"
+# Modify test/regression to add tests
+docker run -u $(id -u ${USER}):$(id -g ${USER}) -v $(pwd):/OpenROAD openroad/openroad bash -c "/OpenROAD/test/regression"
+# one bad actor
+docker run -u $(id -u ${USER}):$(id -g ${USER}) -v $(pwd):/OpenROAD openroad/openroad bash -c "cd /OpenROAD/src/replace/test && python3 regression.py run openroad"
+

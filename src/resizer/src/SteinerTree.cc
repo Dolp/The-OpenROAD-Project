@@ -95,8 +95,10 @@ makeSteinerTree(const Net *net,
     delete [] y;
     return tree;
   }
-  else
+  else {
+    delete tree;
     return nullptr;
+  }
 }
 
 static void
@@ -138,6 +140,11 @@ SteinerTree::setTree(Flute::Tree tree,
     loc_pins.pop_back();
     steiner_pt_pin_map_[i] = pin;
   }
+}
+
+SteinerTree::SteinerTree() :
+  tree_({0, 0, nullptr})
+{
 }
 
 SteinerTree::~SteinerTree()

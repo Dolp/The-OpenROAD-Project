@@ -6,18 +6,23 @@
 	url = https://github.com/The-OpenROAD-Project/OpenDB.git
 [submodule "flute3"]
 	path = src/flute3
-	url = https://github.com/The-OpenROAD-Project/flute3
+	url = https://github.com/The-OpenROAD-Project/flute3.git
 [submodule "src/replace"]
 	path = src/replace
 	url = https://github.com/The-OpenROAD-Project/RePlAce.git
-	branch = openroad
+	branch = replace
 [submodule "src/ioPlacer"]
 	path = src/ioPlacer
 	url = https://github.com/The-OpenROAD-Project/ioPlacer.git
-[submodule "src/opendp"]
-	path = src/opendp
-	url = https://github.com/The-OpenROAD-Project/OpenDP.git
-	branch = openroad
 [submodule "src/FastRoute"]
 	path = src/FastRoute
 	url = https://github.com/The-OpenROAD-Project/FastRoute.git
+[submodule "src/eigen"]
+	path = src/eigen
+	url = https://gitlab.com/libeigen/eigen.git
+[submodule "src/TritonMacroPlace"]
+	path = src/TritonMacroPlace
+	url = https://github.com/The-OpenROAD-Project/TritonMacroPlace.git
+[submodule "src/OpenRCX"]
+	path = src/OpenRCX
+	url = https://github.com/The-OpenROAD-Project/OpenRCX.git

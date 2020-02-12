@@ -93,6 +93,34 @@ getResizer()
   return openroad->getResizer();
 }
 
+TritonCTS::TritonCTSKernel *
+getTritonCts()
+{
+  OpenRoad *openroad = getOpenRoad();
+  return openroad->getTritonCts();
+}
+
+MacroPlace::TritonMacroPlace *
+getTritonMp()
+{
+  OpenRoad *openroad = getOpenRoad();
+  return openroad->getTritonMp();
+}
+
+replace::Replace*
+getReplace()
+{
+  OpenRoad *openroad = getOpenRoad();
+  return openroad->getReplace();
+}
+
+OpenRCX::Ext *
+getOpenRCX()
+{
+  OpenRoad *openroad = getOpenRoad();
+  return openroad->getOpenRCX();
+}
+
 } // namespace
 
 using ord::OpenRoad;
@@ -102,6 +130,8 @@ using ord::ensureLinked;
 using ord::getDbNetwork;
 using ord::getSta;
 using ord::getResizer;
+using ord::getTritonCts;
+using ord::getOpenRCX;
 
 %}
 
@@ -138,17 +168,18 @@ read_lef_cmd(const char *filename,
 }
 
 void
-read_def_cmd(const char *filename)
+read_def_cmd(const char *filename, bool order_wires)
 {
   OpenRoad *ord = getOpenRoad();
-  ord->readDef(filename);
+  ord->readDef(filename, order_wires);
 }
 
 void
-write_def_cmd(const char *filename)
+  write_def_cmd(const char *filename,
+		const char *version)
 {
   OpenRoad *ord = getOpenRoad();
-  ord->writeDef(filename);
+  ord->writeDef(filename, version);
 }
 
 void
@@ -229,26 +260,16 @@ db_has_rows()
     && db->getChip()->getBlock()->getRows().size() > 0;
 }
 
-// Defined in OpenDB/src/swig/tcl/dbhelpers.i
-bool
-db_def_diff(odb::dbDatabase *db1,
-	    const char *def_filename);
-
-bool
-def_diff(const char *def_filename)
+sta::Sta *
+get_sta()
 {
-  return db_def_diff(getDb(), def_filename);
+  return sta::Sta::sta();
+}
+
+void
+set_cmd_sta(sta::Sta *sta)
+{
+  sta::Sta::setSta(sta);
 }
 
 %} // inline
-
-// OpenROAD swig files
-%include "InitFloorplan.i"
-
-// Diff the current database with def_filename.
-// Returns true if differences were found.
-// Unfortunately, this current does not work very well.
-// write_def/read_def produce different database layouts if
-// the database has been edited before writing.
-bool
-def_diff(const char *def_filename);

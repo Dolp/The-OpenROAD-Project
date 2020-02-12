@@ -18,16 +18,51 @@ exec tclsh $0 ${1+"$@"}
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 # Usage: regression help | test1 [test2...]
-# where test is all or the name of a tcl script in $STA/test
+# where test is all or the name of a tcl script in /test
 
 # Directory containing tests.
 set test_dir [file dirname [file normalize [info script]]]
-set openroad_dir [file dirname $test_dir]
+set ord_dir [file dirname $test_dir]
 
 source [file join $test_dir "regression_vars.tcl"]
-source [file join $openroad_dir "test" "regression.tcl"]
+source [file join $test_dir "regression.tcl"]
 
-regression_main
+set tool_errors 0
+
+# Flow based tests (MIA)
+#puts "------------------------------------------------------"
+#puts "OpenROAD"
+incr tool_errors [regression_body]
+
+set tool_scripts {"Init floorplan" "src/init_fp/test/regression" \
+		    "DB STA" "src/dbSta/test/regression" \
+		    "I/O placer" "src/ioPlacer/test/regression" \
+		    "PDN gen" "src/pdngen/test/regression" \
+		    "Triton Macro Place" "src/TritonMacroPlace/test/regression" \
+		    "Resizer" "src/resizer/test/regression" \
+		    "Triton CTS" "src/TritonCTS/test/regression" \
+		    "OpenDP" "src/opendp/test/regression" \
+		    "Fast Route" "src/FastRoute/test/regression" \
+		    "Tap cell" "src/tapcell/test/regression" \
+		    "tool" "src/tool/test/regression" \
+		  }
+# side lined
+# "Replace" "src/replace/test/regression" \
+
+foreach {tool script} $tool_scripts {
+  puts "------------------------------------------------------"
+  puts $tool
+  if { [catch "exec [file join $ord_dir $script] >@stdout"] } {
+    incr tool_errors
+  }
+}
+
+puts "------------------------------------------------------"
+if { $tool_errors } {
+  puts "Found $tool_errors tool regression failures."
+}
+
+exit $tool_errors
 
 # Local Variables:
 # mode:tcl
