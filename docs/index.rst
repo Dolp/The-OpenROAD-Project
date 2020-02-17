@@ -10,11 +10,11 @@ Welcome to OpenROAD's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   user/overview
+   user/getting-started
+   user/user-guide
+   user/tool-limitations
+   user/faqs
+   contrib/developer-guide
+   contrib/getting-involved
 
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
