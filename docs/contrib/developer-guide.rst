@@ -24,6 +24,7 @@ Tool File Organization
 Every tool follows the following file structure.
 
 .. code-block:: c
+
     CMakelists.txt - add_subdirectory's src/CMakelists.txt
     src/ - sources and private headers
     src/CMakelists.txt
