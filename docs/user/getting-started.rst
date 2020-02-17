@@ -388,7 +388,7 @@ RePlAce global placement.
 Use the `set_wire_rc` command to set resistance and capacitance of
 estimated wires used for timing.
 
-#### Detailed Placement
+**Detailed Placement**
 
 Legalize a design that has been globally placed.
 
@@ -398,7 +398,7 @@ Legalize a design that has been globally placed.
 
 
 
-#### Clock Tree Synthesis
+**Clock Tree Synthesis**
 
 Create clock tree subnets.
 
@@ -414,7 +414,7 @@ Create clock tree subnets.
 - ``root_buffer`` is the master cell of the buffer that serves as root for the clock tree.
 - ``clk_nets`` is a string containing the names of the clock roots. If this parameter is ommitted, TritonCTS looks for the clock roots automatically.
 
-#### Global Routing
+**Global Routing**
 
 FastRoute global route.
 Generate routing guides given a placed design.
@@ -435,6 +435,7 @@ Generate routing guides given a placed design.
 
 
 Options description:
+
 - **capacity_adjustment**: Set global capacity adjustment (e.g.: -capacity_adjustment *0.3*)
 - **min_routing_layer**: Set minimum routing layer (e.g.: -min_routing_layer *2*)
 - **max_routing_layer**: Set maximum routing layer (e.g.: max_routing_layer *9*)
@@ -446,7 +447,8 @@ Options description:
 - **unidirectional_routing**: Activate unidirectional routing *(flag)*
 - **clock_net_routing**: Activate clock net routing *(flag)*
 
-###### NOTE 1: if you use the flag *unidirectional_routing*, the minimum routing layer will be assigned as "2" automatically
-###### NOTE 2: the first routing layer of the design have index equal to 1
-###### NOTE 3: if you use the flag *clock_net_routing*, only guides for clock nets will be generated
+
+* **NOTE 1:** if you use the flag *unidirectional_routing*, the minimum routing layer will be assigned as "2" automatically
+* **NOTE 2:** the first routing layer of the design have index equal to 1
+* **NOTE 3:** if you use the flag *clock_net_routing*, only guides for clock nets will be generated
 
