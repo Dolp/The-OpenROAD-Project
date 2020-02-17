@@ -156,14 +156,15 @@ Builds
 Checking out the OpenROAD repo with --recursive installs all of the
 OpenRoad tools and their submodules.
 
-```
-git clone --recusive https://github.com/The-OpenROAD-Project/OpenROAD.git
-cd OpenROAD
-mkdir build
-cd build
-cmake ..
-make
-```
+.. code-block:: shell
+
+    git clone --recusive https://github.com/The-OpenROAD-Project/OpenROAD.git
+    cd OpenROAD
+    mkdir build
+    cd build
+    cmake ..
+    make
+
 
 All tools build using cmake and must have a CMakeLists.txt file in
 their tool directory.
@@ -173,12 +174,13 @@ This builds the 'openroad' executable in /build.
 Note that removing submodules from a repo when moving it into OpenROAD
 is less than obvious.  Here are the steps:
 
-```
-git submodule deinit <path_to_submodule>
-git rm <path_to_submodule>
-git commit-m "Removed submodule "
-rm -rf .git/modules/<path_to_submodule>
-```
+.. code-block:: shell
+
+    git submodule deinit <path_to_submodule>
+    git rm <path_to_submodule>
+    git commit-m "Removed submodule "
+    rm -rf .git/modules/<path_to_submodule>
+
 
 Tool Work Flow
 ^^^^^^^^^^^^^^^^
@@ -193,10 +195,11 @@ Work on OpenROAD should be done in the `openroad` branch.
 To make changes to a submodule, first check out a branch of the submodule
 (git clone --recursive does not check out a branch, just a specific commit).
 
-```
-cd src/<tool>
-git checkout <branch>
-```
+.. code-block:: shell
+
+    cd src/<tool>
+    git checkout <branch>
+
 
 `<branch>` is the branch used for development of the tool when it is inside
 OpenROAD. The convention is for <branch> to be named 'openroad'.
@@ -204,11 +207,12 @@ OpenROAD. The convention is for <branch> to be named 'openroad'.
 After making changes inside the tool source tree, stage and commit
 them to the tool repo and push them to the remote repo.
 
-```
-git add ...
-git commit -m "massive improvement"
-git push
-```
+.. code-block:: shell
+
+    git add ...
+    git commit -m "massive improvement"
+    git push
+
 
 If instead you have done development in a different branch or source tree,
 merge those changes into the branch used for OpenROAD.
@@ -216,14 +220,15 @@ merge those changes into the branch used for OpenROAD.
 Once the changes are in the OpenROAD submodule source tree it will show
 them as a diff in the hash for the directory.
 
-```
-cd openroad
-git stage <tool_submodule_dir>
-git commit -m "merge tool massive improvement"
-git push
-```
+.. code-block:: shell
 
-### Example of Adding a Tool to OpenRoad
+    cd openroad
+    git stage <tool_submodule_dir>
+    git commit -m "merge tool massive improvement"
+    git push
+
+
+**Example of Adding a Tool to OpenROAD**
 
 The branch "add_tool" illustrates how to add a tool to OpenRoad.  Use
 `git checkout add_tool` to checkout the branch. To see the changes
@@ -233,23 +238,24 @@ This adds a directory OpenRoad/src/tool that illustrates a tool named "Tool"
 that uses the file structure described and defines a command to run the tool
 with keyword and flag arguments as illustrated below:
 
-```
-% toolize foo
-Helping 23/6
-Gotta pos_arg1 foo
-Gotta param1 0.000000
-Gotta flag1 false
+.. code-block:: shell
 
-% toolize -flag1 -key1 2.0 bar
-Helping 23/6
-Gotta pos_arg1 bar
-Gotta param1 2.000000
-Gotta flag1 true
+    % toolize foo
+    Helping 23/6
+    Gotta pos_arg1 foo
+    Gotta param1 0.000000
+    Gotta flag1 false
 
-% help toolize
-toolize [-key1 key1] [-flag1] pos_arg1
+    % toolize -flag1 -key1 2.0 bar
+    Helping 23/6
+    Gotta pos_arg1 bar
+    Gotta param1 2.000000
+    Gotta flag1 true
 
-```
+    % help toolize
+    toolize [-key1 key1] [-flag1] pos_arg1
+
+
 
 Documentation
 
