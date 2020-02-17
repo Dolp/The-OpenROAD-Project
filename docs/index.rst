@@ -17,8 +17,9 @@ OpenROAD is a chip physical design tool. It uses the OpenDB_ database as a desig
    user/user-guide
    user/tool-limitations
    user/faqs
-   contrib/developer-guide
    contrib/getting-involved
+   contrib/developer-guide
+   
 
 .. _OpenDB: https://github.com/The-OpenROAD-Project/OpenDB
 .. _OpenSTA: https://github.com/The-OpenROAD-Project/OpenSTA
