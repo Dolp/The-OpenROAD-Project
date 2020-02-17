@@ -65,9 +65,8 @@ There are a set of regression tests in `/test`.
     src/resizer/test/regression
 
 
-
-Run
-^^^^
+Quickstart
+-----------
 
 .. code-block:: shell
 
@@ -311,6 +310,7 @@ Note that OpenSTA commands can be used to report timing metrics before
 or after resizing the design.
 
 .. code-block:: shell
+
     set_wire_rc -layer metal2
     report_checks
     report_tns
@@ -324,7 +324,7 @@ or after resizing the design.
     report_wns
 
 
-#### Timing Analysis
+**Timing Analysis**
 
 Timing analysis commands are documented in src/OpenSTA/doc/OpenSTA.pdf.
 
@@ -334,50 +334,54 @@ used by the design.
 
 The example script below timing analyzes a database.
 
-```
-read_liberty liberty1.lib
-read_db reg1.db
-create_clock -name clk -period 10 {clk1 clk2 clk3}
-set_input_delay -clock clk 0 {in1 in2}
-set_output_delay -clock clk 0 out
-report_checks
-```
+.. code-block:: shell
 
-#### Tapcell
+    read_liberty liberty1.lib
+    read_db reg1.db
+    create_clock -name clk -period 10 {clk1 clk2 clk3}
+    set_input_delay -clock clk 0 {in1 in2}
+    set_output_delay -clock clk 0 out
+    report_checks
+
+
+**Tapcell**
 
 Tapcell and endcap insertion.
 
-```
-tapcell -tapcell_master <tapcell_master>
-        -endcap_master <endcap_master>
-        -endcap_cpp <endcap_cpp>
-        -distance <dist>
-        -halo_width_x <halo_x>
-        -halo_width_y <halo_y>
-        -tap_nwin2_master <tap_nwin2_master>
-        -tap_nwin3_master <tap_nwin3_master>
-        -tap_nwout2_master <tap_nwout2_master>
-        -tap_nwout3_master <tap_nwout3_master>
-        -tap_nwintie_master <tap_nwintie_master>
-        -tap_nwouttie_master <tap_nwouttie_master>
-        -cnrcap_nwin_master <cnrcap_nwin_master>
-        -cnrcap_nwout_master <cnrcap_nwout_master>
-        -incnrcap_nwin_master <incnrcap_nwin_master>
-        -incnrcap_nwout_master <incnrcap_nwout_master>
-        -tbtie_cpp <tbtie_cpp>
-        -no_cell_at_top_bottom
-        -add_boundary_cell
-```
+.. code-block:: shell
+
+    tapcell -tapcell_master <tapcell_master>
+            -endcap_master <endcap_master>
+            -endcap_cpp <endcap_cpp>
+            -distance <dist>
+            -halo_width_x <halo_x>
+            -halo_width_y <halo_y>
+            -tap_nwin2_master <tap_nwin2_master>
+            -tap_nwin3_master <tap_nwin3_master>
+            -tap_nwout2_master <tap_nwout2_master>
+            -tap_nwout3_master <tap_nwout3_master>
+            -tap_nwintie_master <tap_nwintie_master>
+            -tap_nwouttie_master <tap_nwouttie_master>
+            -cnrcap_nwin_master <cnrcap_nwin_master>
+            -cnrcap_nwout_master <cnrcap_nwout_master>
+            -incnrcap_nwin_master <incnrcap_nwin_master>
+            -incnrcap_nwout_master <incnrcap_nwout_master>
+            -tbtie_cpp <tbtie_cpp>
+            -no_cell_at_top_bottom
+            -add_boundary_cell
+
 You can find script examples for both 45nm/65nm and 14nm in ```tapcell/etc/scripts```
 
-#### Global Placement
+**Global Placement**
 
 RePlAce global placement.
 
-```
-global_placement [-timing_driven]
+.. code-block:: shell
+
+    global_placement [-timing_driven]
                  [-bin_grid_count grid_count]
-```
+
+
 - **timing_driven**: Enable timing-driven mode
 - **grid_count**: [64,128,256,512,..., int]. Default: Defined by internal algorithm.
 
@@ -388,22 +392,24 @@ estimated wires used for timing.
 
 Legalize a design that has been globally placed.
 
-```
-legalize_placement [-constraints constraints_file]
+.. code-block:: shell
 
-```
+    legalize_placement [-constraints constraints_file]
+
+
 
 #### Clock Tree Synthesis
 
 Create clock tree subnets.
 
-```
-clock_tree_synthesis -lut_file <lut_file> \
-                     -sol_list <sol_list_file> \
-                     -wire_unit <wire_unit> \
-                     -root_buf <root_buf> \
-                     [-clk_nets <list_of_clk_nets>]
-```
+.. code-block:: shell
+
+    clock_tree_synthesis -lut_file <lut_file> \
+                        -sol_list <sol_list_file> \
+                        -wire_unit <wire_unit> \
+                        -root_buf <root_buf> \
+                        [-clk_nets <list_of_clk_nets>]
+
 - ```lut_file```, ```sol_list``` and ```wire_unit``` are parameters related to the technology characterization described [here](https://github.com/The-OpenROAD-Project/TritonCTS/blob/master/doc/Technology_characterization.md).
 - ``root_buffer`` is the master cell of the buffer that serves as root for the clock tree.
 - ``clk_nets`` is a string containing the names of the clock roots. If this parameter is ommitted, TritonCTS looks for the clock roots automatically.
@@ -413,19 +419,20 @@ clock_tree_synthesis -lut_file <lut_file> \
 FastRoute global route.
 Generate routing guides given a placed design.
 
-```
-fastroute -output_file out_file
-          -capacity_adjustment <cap_adjust>
-          -min_routing_layer <min_layer>
-          -max_routing_layer <max_layer>
-          -pitches_in_tile <pitches>
-          -layers_adjustments <list_of_layers_to_adjust>
-          -regions_adjustments <list_of_regions_to_adjust>
-          -nets_alphas_priorities <list_of_alphas_per_net>
-          -verbose <verbose>
-          -unidirectional_routing
-          -clock_net_routing
-```
+.. code-block:: shell
+
+    fastroute -output_file out_file
+            -capacity_adjustment <cap_adjust>
+            -min_routing_layer <min_layer>
+            -max_routing_layer <max_layer>
+            -pitches_in_tile <pitches>
+            -layers_adjustments <list_of_layers_to_adjust>
+            -regions_adjustments <list_of_regions_to_adjust>
+            -nets_alphas_priorities <list_of_alphas_per_net>
+            -verbose <verbose>
+            -unidirectional_routing
+            -clock_net_routing
+
 
 Options description:
 - **capacity_adjustment**: Set global capacity adjustment (e.g.: -capacity_adjustment *0.3*)
@@ -442,8 +449,4 @@ Options description:
 ###### NOTE 1: if you use the flag *unidirectional_routing*, the minimum routing layer will be assigned as "2" automatically
 ###### NOTE 2: the first routing layer of the design have index equal to 1
 ###### NOTE 3: if you use the flag *clock_net_routing*, only guides for clock nets will be generated
-
-
-Quickstart
------------
 
