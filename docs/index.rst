@@ -6,8 +6,10 @@
 Welcome to OpenROAD's documentation!
 ====================================
 
+OpenROAD is a chip physical design tool. It uses the OpenDB_ database as a design database and representation. OpenSTA_ is used for static timing analysis.
+
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: Contents:
 
    user/overview
@@ -18,3 +20,5 @@ Welcome to OpenROAD's documentation!
    contrib/developer-guide
    contrib/getting-involved
 
+.. _OpenDB: https://github.com/The-OpenROAD-Project/OpenDB
+.. _OpenSTA: https://github.com/The-OpenROAD-Project/OpenSTA

@@ -1,2 +1,2 @@
-Tool Limitations
-=================
+Capabilities/Limitations
+=========================
