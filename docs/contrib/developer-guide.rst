@@ -23,39 +23,41 @@ Tool File Organization
 
 Every tool follows the following file structure.
 
-```
-CMakelists.txt - add_subdirectory's src/CMakelists.txt
-src/ - sources and private headers
-src/CMakelists.txt
-include/<toolname>/ - exported headers
-test/
-test/regression
-```
+.. code-block:: c
+    CMakelists.txt - add_subdirectory's src/CMakelists.txt
+    src/ - sources and private headers
+    src/CMakelists.txt
+    include/<toolname>/ - exported headers
+    test/
+    test/regression
+
 
 OpenROAD repository
 
-```
-CMakeLists.txt - top level cmake file
-src/Main.cc
-src/OpenROAD.cc - OpenROAD class functions
-src/OpenROAD.i - top level swig, %includes tool swig files
-src/OpenROAD.tcl - basic read/write lef/def/db commands
-src/OpenROAD.hh - OpenROAD top level class, has instances of tools
-```
+.. code-block:: c
+
+    CMakeLists.txt - top level cmake file
+    src/Main.cc
+    src/OpenROAD.cc - OpenROAD class functions
+    src/OpenROAD.i - top level swig, %includes tool swig files
+    src/OpenROAD.tcl - basic read/write lef/def/db commands
+    src/OpenROAD.hh - OpenROAD top level class, has instances of tools
+
 
 Submodule repos in /src (note these are NOT in src/module)
 
-```
-OpenDB
-OpenSTA
-replace
-ioPlacer
-FastRoute
-TritonMacroPlace
-OpenRCX
-flute3
-eigen
-```
+.. code-block:: shell
+
+    OpenDB
+    OpenSTA
+    replace
+    ioPlacer
+    FastRoute
+    TritonMacroPlace
+    OpenRCX
+    flute3
+    eigen
+
 
 Submodules that are shared by multiple tools are owned by OpenROAD
 so that there are not redundant source trees and compiles.
@@ -102,12 +104,12 @@ about the tool internals or include a gigantic header file.
 
 `MakeTool.hh` defines the following:
 
-```
-Tool *makeTool();
-void initTool(OpenRoad *openroad);
-void deleteTool(Tool *tool);
+.. code-block:: c
 
-```
+    Tool *makeTool();
+    void initTool(OpenRoad *openroad);
+    void deleteTool(Tool *tool);
+
 
 The OpenRoad::init() function calls all of the makeTool functions and
 then all of the initTool() functions. The init functions are called
@@ -324,9 +326,10 @@ Database Math 101
 
 DEF defines the units it uses with the units command.
 
-```
-UNITS DISTANCE MICRONS 1000 ;
-```
+.. code-block:: c
+
+    UNITS DISTANCE MICRONS 1000 ;
+
 
 Typically the units are 1000 or 2000 database units (DBU) per micron.
 DBUs are integers, so the distance resolution is typically 1/1000u
@@ -382,7 +385,9 @@ because the floating point representation of the LEF distances is a
 fraction that cannot be exactly represented in binary. Even worse
 is the practice of reinventing round in the following idiom.
 
-```(int) x_coord + 0.5```
+.. code-block:: c
+
+    (int) x_coord + 0.5
 
 Even worse than using a `double` is using `float` because the mantissa
 is only 23 bits, so the maximum exactly representable integer is
@@ -393,12 +398,13 @@ the calculation can be done with a simple divide using `int`s, which
 `floor`s the result. For example, to snap a coordinate to the pitch
 of a layer the following can be used.
 
-```
-int x, y;
-inst->getOrigin(x, y);
-int pitch = layer->getPitch();
-int x_snap = (x / pitch) * pitch;
-```
+.. code-block:: c
+
+    int x, y;
+    inst->getOrigin(x, y);
+    int pitch = layer->getPitch();
+    int x_snap = (x / pitch) * pitch;
+
 
 The use of rounding in existing code that uses floating point
 representations is to compensate for the inability to represent
