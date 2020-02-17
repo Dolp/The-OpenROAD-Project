@@ -1,6 +1,22 @@
 Getting Started
 ================
 
+Overview
+---------
+
+OpenROAD is a Chip Physical Design tool. 
+
+The OpenROAD v1.0 tool, to be released in July 2020, will be capable of push-button,
+DRC-clean RTL-to-GDS layout generation in a commercial FinFET process node. 
+In its v1.0 form, it will be integrated on an incremental substrate provided
+by the OpenDB_ database and the OpenSTA_ static timing engine. It will also offer users and
+developers Tcl/Python scripting interfaces, and support SoC designs. OpenROAD v1.0 will thus
+make substantial advances over the “files-based tool chain” seen at the project’s July 2019
+"alpha" milestone. At the same time, the functionality of OpenROAD v1.0 will be highly limited
+relative to that of commercial EDA tools that IC designers are familiar with. Further, the
+development resources of the OpenROAD project are being largely focused on support of a
+~July 2020 SoC tapeout in a commercial FinFET node.
+
 Build Locally
 --------------
 
