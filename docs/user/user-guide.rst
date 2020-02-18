@@ -6,7 +6,7 @@ As of the current implmentation, the flow is divided into three stages:
 
 1. Logic Synthesis: is performed by yosys_.
 2. Floorplanning -> Global Routing: is performed by `OpenROAD App`_.
-3. Detailed RoutingL is performed by `TritonRoute`_
+3. Detailed Routing: is performed by `TritonRoute`_
 
 To Run OpenROAD flow, we provide scripts to automate the RTL-to-GDS stages. 
 Alternatively, you can run the individual steps manually.
