@@ -151,3 +151,7 @@ and make a database.
     write_db reg1.db
 
 
+.. _OpenDB: https://github.com/The-OpenROAD-Project/OpenDB
+.. _OpenSTA: https://github.com/The-OpenROAD-Project/OpenSTA
+.. _`Toward an Open-Source Digital Flow: First Learnings from the OpenROAD Project`: https://vlsicad.ucsd.edu/Publications/Conferences/371/c371.pdf
+.. _`doi:10.1145/3316781.3326334`: https://dl.acm.org/citation.cfm?id=3326334

@@ -33,11 +33,11 @@ Project`_. Also, available from ACM Digital Library (`doi:10.1145/3316781.332633
 How to navigate this documentation
 -----------------------------------
 
-* If you are a **user**, start with the *Getting Started* guide, and then move on to the *User Guide*.
-* If you are willing to **contribute**, see the *Getting Involved* section.
-* If you are a **developer** with EDA background, learn more about how you can use OpenROAD as the infrastructure for your tools in the *Developer Guide* section.
+* If you are a **user**, start with the `Getting Started`_ guide, and then move on to the `User Guide`_.
+* If you are willing to **contribute**, see the `Getting Involved`_ section.
+* If you are a **developer** with EDA background, learn more about how you can use OpenROAD as the infrastructure for your tools in the `Developer Guide`_ section.
 
-See *FAQs* and *Capabilities/Limitations* for relevant background on the project.
+See `FAQs`_ and `Capabilities/Limitations`_ for relevant background on the project.
 
 How to get in touch
 --------------------
@@ -66,3 +66,9 @@ We maintain the following channels for communication:
 .. _OpenSTA: https://github.com/The-OpenROAD-Project/OpenSTA
 .. _`Toward an Open-Source Digital Flow: First Learnings from the OpenROAD Project`: https://vlsicad.ucsd.edu/Publications/Conferences/371/c371.pdf
 .. _`doi:10.1145/3316781.3326334`: https://dl.acm.org/citation.cfm?id=3326334
+.. _`Getting Started`: user/getting-started
+.. _`User Guide`: user/user-guide
+.. _`Getting Involved`: contrib/getting-involved
+.. _`Developer Guide`: contrib/developer-guide
+.. _`FAQs`: user/faqs
+.. _`Capabilities/Limitations`: user/tool-limitations
