@@ -66,9 +66,9 @@ We maintain the following channels for communication:
 .. _OpenSTA: https://github.com/The-OpenROAD-Project/OpenSTA
 .. _`Toward an Open-Source Digital Flow: First Learnings from the OpenROAD Project`: https://vlsicad.ucsd.edu/Publications/Conferences/371/c371.pdf
 .. _`doi:10.1145/3316781.3326334`: https://dl.acm.org/citation.cfm?id=3326334
-.. _`Getting Started`: user/getting-started
-.. _`User Guide`: user/user-guide
-.. _`Getting Involved`: contrib/getting-involved
-.. _`Developer Guide`: contrib/developer-guide
-.. _`FAQs`: user/faqs
-.. _`Capabilities/Limitations`: user/tool-limitations
+.. _`Getting Started`: user/getting-started.html
+.. _`User Guide`: user/user-guide.html
+.. _`Getting Involved`: contrib/getting-involved.html
+.. _`Developer Guide`: contrib/developer-guide.html
+.. _`FAQs`: user/faqs.html
+.. _`Capabilities/Limitations`: user/tool-limitations.html
