@@ -5,7 +5,7 @@ OpenROAD is divided into a number of tools that are orchestrated together to ach
 As of the current implmentation, the flow is divided into three stages:
 
 1. Logic Synthesis: is performed by yosys_.
-2. Floorplanning -> Global Routing: is performed by `OpenROAD App`_.
+2. Floorplanning through Global Routing: are performed by `OpenROAD App`_.
 3. Detailed Routing: is performed by `TritonRoute`_
 
 To Run OpenROAD flow, we provide scripts to automate the RTL-to-GDS stages. 
@@ -34,6 +34,7 @@ Setup
 ^^^^^^
 
 The flow has the following dependencies:
+
 * OpenROAD
 * KLayout
 * TritonRoute
