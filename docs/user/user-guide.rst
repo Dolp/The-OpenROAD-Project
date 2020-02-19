@@ -2,7 +2,7 @@ User Guide
 ============
 
 OpenROAD is divided into a number of tools that are orchestrated together to achieve RTL-to-GDS.
-As of the current implmentation, the flow is divided into three stages:
+As of the current implementation, the flow is divided into three stages:
 
 1. Logic Synthesis: is performed by yosys_.
 2. Floorplanning through Global Routing: are performed by `OpenROAD App`_.
