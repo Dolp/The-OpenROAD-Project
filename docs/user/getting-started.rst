@@ -40,8 +40,12 @@ The OpenROAD build requires the following packages:
   cmake ..
   make
 
+.. note::
 
-OpenROAD git submodules (cloned by the --recursive flag) are located in `/src`.
+    If you are cloning OpenROAD within a corporate network, you might need to get past the proxy using:
+    git config --global http.proxy <proxy_url> 
+
+OpenROAD git submodules (cloned by the --recursive flag) are located in ``/src``.
 
 The default build type is RELEASE to compile optimized code.
 The resulting executable is in `build/resizer`.
