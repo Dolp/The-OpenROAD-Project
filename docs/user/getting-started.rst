@@ -43,7 +43,7 @@ The OpenROAD build requires the following packages:
 .. note::
 
     If you are cloning OpenROAD within a corporate network, you might need to get past the proxy using:
-    git config --global http.proxy <proxy_url> 
+    ``git config --global http.proxy <proxy_url>`` 
 
 OpenROAD git submodules (cloned by the --recursive flag) are located in ``/src``.
 
