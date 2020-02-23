@@ -1,4 +1,4 @@
-### Tool Philosophy
+# Developer Guide
 
 OpenROAD is a tool to build a chip from a synthesized netlist to a
 physical design for manufacturing.
@@ -11,7 +11,7 @@ between tools and forking processes is strongly discouraged. This
 architecture streamlines the construction of a flexible tool flow and
 minimizes the overhead of invoking each tool in the flow.
 
-### Tool File Organization
+## Tool File Organization
 
 Every tool follows the following file structure.
 
@@ -81,7 +81,7 @@ have an implicit argument of the current OpenROAD class
 object. Functions to get individual tools from the OpenROAD object can
 be defined.
 
-### Initialization (c++ tools only)
+## Initialization (c++ tools only)
 
 The OpenRoad class only has pointers to each tools with functions to
 get each tool.  Each tool has (at a minimum) a function to make an
@@ -105,7 +105,7 @@ then all of the initTool() functions. The init functions are called
 from the bottom of the tool dependences. Each init function grabs the
 state it needs out of the OpenRoad instance.
 
-### Commands
+## Commands
 
 Tools should provide Tcl commands to control them. Tcl object based
 tool interfaces are not user friendly. Define Tcl procedures that take
@@ -117,7 +117,7 @@ Use swig to define internal functions to C++ functionality.p
 Tcl files can be included by encoding them in cmake into a string
 that is evaluated at run time (See Resizer::init()).
 
-### Test
+## Test
 
 Each "tool" has a /test directory containing a script nameed
 "regression" to run "unit" tests. With no arguments it should run
@@ -136,7 +136,7 @@ The regression script should return an exit code of zero if there are
 no errors and 1 if there are errors.  The script should **not** print
 thousands of lines of internal tool info.
 
-### Builds
+## Builds
 
 Checking out the OpenROAD repo with --recursive installs all of the
 OpenRoad tools and their submodules.
@@ -165,7 +165,7 @@ git commit-m "Removed submodule "
 rm -rf .git/modules/<path_to_submodule>
 ```
 
-### Tool Work Flow
+## Tool Work Flow
 
 To work on one of the tools inside OpenROAD when it is a submodule
 requires updating the OpenROAD repo to integrate your changes.
@@ -207,7 +207,7 @@ git commit -m "merge tool massive improvement"
 git push
 ```
 
-### Example of Adding a Tool to OpenRoad
+## Example of Adding a Tool to OpenRoad
 
 The branch "add_tool" illustrates how to add a tool to OpenRoad.  Use
 `git checkout add_tool` to checkout the branch. To see the changes
@@ -235,12 +235,12 @@ toolize [-key1 key1] [-flag1] pos_arg1
 
 ```
 
-### Documentation
+## Documentation
 
 Tool commands should be documented in the top level OpenROAD README.md file.
 Detailed documentation should be the tool/README.md file.
 
-### Tool Flow
+## Tool Flow
 
 1. Verilog to DB (dbSTA)
 2. Init Floorplan (OpenROAD)
@@ -257,47 +257,28 @@ Detailed documentation should be the tool/README.md file.
 13. Detailed route (TritonRoute)n
 14. Final timing/power report (OpenSTA)
 
-### Tool Checklist
+## Tool Checklist
 
-OpenROAD submodules reference tool `openroad` branch head
-No `develop`, `openroad_app`, `openroad_build` branches.
-
-CMakeLists.txt does not use glob.
+* OpenROAD submodules reference tool `openroad` branch head
+* No `develop`, `openroad_app`, `openroad_build` branches.
+* CMakeLists.txt does not use glob.
 https://gist.github.com/mbinna/c61dbb39bca0e4fb7d1f73b0d66a4fd1
-
-No main.cpp or main procedure.
-
-No compiler warnings for gcc, clang with optimization enabled.
-
-Does not call flute::readLUT (called once by OpenRoad).
-
-Tcl command(s) documented in top level README.md in flow order.
-
-Command line tool documentation in tool README.
-
-Conforms to Tcl command naming standards (no camel case).
-
-Does not read configuration files. 
-Use command arguments or support commands.
-
-.clang-format at tool root directory to aid foreign programmers.
-
-No jenkins/, Jenkinsfile, Dockerfile in tool directory.
-
-regression script named "test/regression" with default argument that runs
-tests. Not tests/regression-tcl.sh, not test/run_tests.py etc.
-
-Regression runs independent of current directory.
-
-Regression only prints test results or summary, does not belch 1000s
+* No main.cpp or main procedure.
+* No compiler warnings for gcc, clang with optimization enabled.
+* Does not call flute::readLUT (called once by OpenRoad).
+* Tcl command(s) documented in top level README.md in flow order.
+* Command line tool documentation in tool README.
+* Conforms to Tcl command naming standards (no camel case).
+* Does not read configuration files. 
+* Use command arguments or support commands.
+* `.clang-format` at tool root directory to aid foreign programmers.
+* No jenkins/, Jenkinsfile, Dockerfile in tool directory.
+* regression script named "test/regression" with default argument that runs tests. Not tests/regression-tcl.sh, not test/run_tests.py etc.
+* Regression runs independent of current directory.
+* Regression only prints test results or summary, does not belch 1000s
 of lines of output.
-
-Test scripts use OpenROAD tcl commands (not itcl, not internal accessors).
-
-Regressions report no memory errors with valgrind.
-
-Regressions report no memory leaks with valgrind (difficult).
-
-###
+* Test scripts use OpenROAD tcl commands (not itcl, not internal accessors).
+* Regressions report no memory errors with valgrind.
+* Regressions report no memory leaks with valgrind (difficult).
 
 James Cherry, Dec 2019

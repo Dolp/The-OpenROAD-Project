@@ -59,6 +59,7 @@ We maintain the following channels for communication:
    user/tool-limitations
    contrib/getting-involved
    contrib/developer-guide
+   contrib/database-math
    user/faqs
    
 
