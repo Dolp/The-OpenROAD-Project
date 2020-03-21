@@ -27,6 +27,7 @@
 #include "db_sta/dbSta.hh"
 #include "db_sta/dbNetwork.hh"
 #include "openroad/Version.hh"
+#include "openroad/Error.hh"
 #include "openroad/OpenRoad.hh"
 
 ////////////////////////////////////////////////////////////////
@@ -57,7 +58,7 @@ getDb()
 }
 
 // Copied from StaTcl.i because of ordering issues.
-class CmdErrorNetworkNotLinked : public sta::StaException
+class CmdErrorNetworkNotLinked : public sta::Exception
 {
 public:
   virtual const char *what() const throw()
@@ -121,17 +122,21 @@ getOpenRCX()
   return openroad->getOpenRCX();
 }
 
+pdnsim::PDNSim*
+getPDNSim()
+{
+  OpenRoad *openroad = getOpenRoad();
+  return openroad->getPDNSim();
+}
+
 } // namespace
 
 using ord::OpenRoad;
 using ord::getOpenRoad;
 using ord::getDb;
 using ord::ensureLinked;
-using ord::getDbNetwork;
-using ord::getSta;
-using ord::getResizer;
-using ord::getTritonCts;
-using ord::getOpenRCX;
+
+using odb::dbDatabase;
 
 %}
 
@@ -141,7 +146,7 @@ using ord::getOpenRCX;
 //
 ////////////////////////////////////////////////////////////////
 
-%include "OpenSTA/tcl/StaException.i"
+%include "Exception.i"
 
 %inline %{
 
@@ -175,8 +180,8 @@ read_def_cmd(const char *filename, bool order_wires)
 }
 
 void
-  write_def_cmd(const char *filename,
-		const char *version)
+write_def_cmd(const char *filename,
+	      const char *version)
 {
   OpenRoad *ord = getOpenRoad();
   ord->writeDef(filename, version);
@@ -244,6 +249,13 @@ db_has_tech()
   return getDb()->getTech() != nullptr;
 }
 
+odb::Rect
+get_db_core()
+{
+  OpenRoad *ord = getOpenRoad();
+  return ord->getCore();
+}
+
 double
 dbu_to_microns(int dbu)
 {
@@ -254,7 +266,7 @@ dbu_to_microns(int dbu)
 bool
 db_has_rows()
 {
-  odb::dbDatabase *db = ord::OpenRoad::openRoad()->getDb();
+  dbDatabase *db = OpenRoad::openRoad()->getDb();
   return db->getChip()
     && db->getChip()->getBlock()
     && db->getChip()->getBlock()->getRows().size() > 0;
@@ -266,10 +278,25 @@ get_sta()
   return sta::Sta::sta();
 }
 
+// For some bizzare reason this fails without the namespace qualifier for Sta.
 void
 set_cmd_sta(sta::Sta *sta)
 {
   sta::Sta::setSta(sta);
+}
+
+// Used by test/error1.tcl
+void
+test_error1()
+{
+  ord::error("this is only a test.");
+}
+
+bool
+units_initialized()
+{
+  OpenRoad *openroad = getOpenRoad();
+  return openroad->unitsInitialized();
 }
 
 %} // inline

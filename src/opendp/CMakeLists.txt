@@ -14,7 +14,10 @@ set(OPENDP_TCL_INIT ${CMAKE_CURRENT_BINARY_DIR}/OpendpTclInitVar.cc)
 add_custom_command(OUTPUT ${OPENDP_WRAP}
   COMMAND ${SWIG_EXECUTABLE} -tcl8 -c++ -namespace -prefix opendp -I${OPENDP_HOME}/include -o ${OPENDP_WRAP} ${OPENDP_HOME}/src/opendp.i
   WORKING_DIRECTORY ${OPENDP_HOME}/src
-  DEPENDS ${OPENDP_HOME}/src/opendp.i ${OPENDP_HOME}/include/opendp/Opendp.h
+  DEPENDS
+  ${OPENDP_HOME}/src/opendp.i
+  ${OPENDP_HOME}/include/opendp/Opendp.h
+  ${OPENROAD_HOME}/src/Exception.i
 )
 
 add_custom_command(OUTPUT ${OPENDP_TCL_INIT}
@@ -32,9 +35,10 @@ add_library(opendp
   src/dbToOpendp.cpp
   src/MakeOpendp.cpp
   src/assign.cpp
-  src/check_legal.cpp
+  src/CheckPlacement.cpp
   src/place.cpp
   src/utility.cpp
+  src/FillerPlacement.cpp
 
   ${OPENDP_WRAP}
   ${OPENDP_TCL_INIT}

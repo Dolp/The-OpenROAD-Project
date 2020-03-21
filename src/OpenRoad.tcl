@@ -29,7 +29,7 @@ proc read_lef { args } {
   sta::parse_key_args "read_lef" args keys {} flags {-tech -library}
   sta::check_argc_eq1 "read_lef" $args
 
-  set filename $args
+  set filename [file nativename $args]
   if { ![file exists $filename] } {
     sta::sta_error "$filename does not exist."
   }
@@ -52,7 +52,7 @@ sta::define_cmd_args "read_def" {[-order_wires] filename}
 proc read_def { args } {
   sta::parse_key_args "read_def" args keys {} flags {-order_wires}
   sta::check_argc_eq1 "read_def" $args
-  set filename $args
+  set filename [file nativename $args]
   if { ![file exists $filename] } {
     sta::sta_error "$filename does not exist."
   }
@@ -84,7 +84,7 @@ proc write_def { args } {
   }
 
   sta::check_argc_eq1 "write_def" $args
-  set filename $args
+  set filename [file nativename $args]
   ord::write_def_cmd $filename $version
 }
 
@@ -92,7 +92,7 @@ sta::define_cmd_args "read_db" {filename}
 
 proc read_db { args } {
   sta::check_argc_eq1 "read_db" $args
-  set filename $args
+  set filename [file nativename $args]
   if { ![file exists $filename] } {
     sta::sta_error "$filename does not exist."
   }
@@ -110,7 +110,41 @@ proc write_db { args } {
   ord::write_db_cmd $filename
 }
 
-# Defined by OpenRoad.i
-sta::define_cmd_args "def_diff" {def_filename}
-namespace eval ord { namespace export def_diff }
-namespace import ord::def_diff
+################################################################
+
+namespace eval ord {
+
+trace variable ::file_continue_on_error "w" \
+  ord::trace_file_continue_on_error
+
+# Sync with sta::sta_continue_on_error used by 'source' proc defined by OpenSTA.
+proc trace_file_continue_on_error { name1 name2 op } {
+  set ::sta_continue_on_error $::file_continue_on_error
+}
+
+proc error { what } {
+  ::error "Error: $what"
+}
+
+proc warn { what } {
+  puts "Warning: $what"
+}
+
+proc ensure_units_initialized { } {
+  if { ![units_initialized] } {
+    sta::sta_error "Command units uninitialized. Use the read_liberty or set_cmd_units command to set units."
+  }
+}
+
+# namespace ord
+}
+
+# redefine sta::sta_error to call ord::error
+namespace eval sta {
+
+proc sta_error { msg } {
+  ord::error $msg
+}
+
+# namespace sta
+}

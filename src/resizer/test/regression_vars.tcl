@@ -127,15 +127,16 @@ record_resizer_tests {
   buffer_ports1
   buffer_ports2
   buffer_ports3
+  buffer_ports5
   resize1
   resize2
   resize4
   resize6
   repair_max_cap1
+  repair_max_cap2
   repair_max_fanout1
   repair_max_slew1
   repair_max_slew2
-  repair_max_slew3
   repair_hold1
   repair_hold2
   report_floating_nets1

@@ -14,13 +14,14 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#ifndef RESIZER_H
-#define RESIZER_H
+#pragma once
 
 #include "db_sta/dbSta.hh"
 #include "SteinerTree.hh"
 
 namespace sta {
+
+using odb::Rect;
 
 class RebufferOption;
 
@@ -53,7 +54,6 @@ public:
   // 0.0 - 1.0 (100%) of core size.
   double utilization();
 
-  void init();
   void setDontUse(LibertyCellSeq *dont_use);
   void setMaxUtilization(double max_utilization);
   void resizePreamble(LibertyLibrarySeq *resize_libs);
@@ -97,6 +97,9 @@ public:
   double maxLoadManhattenDistance(Pin *drvr_pin);
 
 protected:
+  void init();
+  void ensureBlock();
+  double findDesignArea();
   void ensureCorner();
   void initCorner(Corner *corner);
   void ensureClkNets();
@@ -131,8 +134,14 @@ protected:
   // Assumes buffer_cell->isBuffer() is true.
   void rebuffer(const Pin *drvr_pin,
 		LibertyCell *buffer_cell);
-  bool hasMaxCapViolation(const Pin *drvr_pin);
-  bool hasMaxSlewViolation(const Pin *drvr_pin);
+  void checkMaxCapViolation(const Pin *pin,
+			    // Return values
+			    bool &violation,
+			    float &limit_ratio);
+  void checkMaxSlewViolation(const Pin *pin,
+			     // Return values
+			     bool &violation,
+			     float &limit_ratio);
   void slewLimit(const Pin *pin,
 		 const MinMax *min_max,
 		 // Return values.
@@ -169,9 +178,9 @@ protected:
   bool dontUse(LibertyCell *cell);
   bool overMaxArea();
   bool hasTopLevelOutputPort(Net *net);
-  adsPoint location(Instance *inst);
+  Point location(Instance *inst);
   void setLocation(Instance *inst,
-		   adsPoint pt);
+		   Point pt);
   Pin *singleOutputPin(const Instance *inst);
   double area(dbMaster *master);
   double area(Cell *cell);
@@ -182,7 +191,7 @@ protected:
 				     float cap,
 				     Required required,
 				     Pin *load_pin,
-				     adsPoint location,
+				     Point location,
 				     RebufferOption *ref,
 				     RebufferOption *ref2);
   void deleteRebufferOptions();
@@ -229,7 +238,7 @@ protected:
 			 int &group_index,
 			 GroupedPins &grouped_loads);
   void reportGroupedLoads(GroupedPins &grouped_loads);
-  adsPoint findCenter(PinSeq &pins);
+  Point findCenter(PinSeq &pins);
 
   float wire_res_;
   float wire_cap_;
@@ -240,6 +249,9 @@ protected:
   dbSta *sta_;
   dbNetwork *db_network_;
   dbDatabase *db_;
+  dbBlock *block_;
+  Rect core_;
+  double design_area_;
   const MinMax *min_max_;
   const DcalcAnalysisPt *dcalc_ap_;
   const Pvt *pvt_;
@@ -255,11 +267,8 @@ protected:
   int resize_count_;
   int inserted_buffer_count_;
   int rebuffer_net_count_;
-  double core_area_;
-  double design_area_;
   RebufferOptionSeq rebuffer_options_;
   friend class RebufferOption;
 };
 
 } // namespace
-#endif
