@@ -1,144 +1,110 @@
 # Getting Started
 
-## Overview
+## Download pre-built binaries
+We currently support pre-built binaries on CentOS 7. Please, refer to the [releases page on GitHub](https://github.com/The-OpenROAD-Project/OpenROAD-flow/releases).
 
-
-OpenROAD is a Chip Physical Design tool. 
-
-The OpenROAD v1.0 tool, to be released in July 2020, will be capable of push-button,
-DRC-clean RTL-to-GDS layout generation in a commercial FinFET process node. 
-In its v1.0 form, it will be integrated on an incremental substrate provided
-by the [OpenDB](https://github.com/The-OpenROAD-Project/OpenDB) database and the [OpenSTA](https://github.com/The-OpenROAD-Project/OpenSTA) static timing engine. It will also offer users and
-developers Tcl/Python scripting interfaces, and support SoC designs. OpenROAD v1.0 will thus
-make substantial advances over the “files-based tool chain” seen at the project’s July 2019
-"alpha" milestone. At the same time, the functionality of OpenROAD v1.0 will be highly limited
-relative to that of commercial EDA tools that IC designers are familiar with. Further, the
-development resources of the OpenROAD project are being largely focused on support of a
-~July 2020 SoC tapeout in a commercial FinFET node.
-
-## Build Locally
-
-The OpenROAD build requires the following packages:
-
-* cmake 3.9
-* gcc or clang
-* bison
-* flex
-* swig 3.0
-* boost
-* tcl 8.5
-* zlib
-
+## Quick Start
 ```
-git clone --recursive https://github.com/The-OpenROAD-Project/OpenROAD.git
+# Clone the repository and submodules
+git clone --recursive https://github.com/The-OpenROAD-Project/OpenROAD-flow
+
+# Build the OpenROAD app
 cd OpenROAD
-mkdir build
-cd build
-cmake ..
+make
+
+# Setup your environment
+source setup_env.sh
+
+# Implement the example gcd design
+cd flow
 make
 ```
+The resulting GDS will be available at `flow/results/nangate45/gcd/6_final.gds`
 
-> If you are cloning OpenROAD within a corporate network, you might need to get past the proxy using:
-> `git config --global http.proxy <proxy_url>`
+## Setting up the Flow
 
-OpenROAD git submodules (cloned by the --recursive flag) are located in `/src`.
+1. Clone the repository
+```
+git clone https://github.com/The-OpenROAD-Project/OpenROAD-flow
+cd OpenROAD-flow/flow
+```
+2. The `openroad` app must be setup to implement designs or run tests. See setup
+   instructions in the repository [README](../README.md#Setup)
+3. Setup your shell environment. If the tools are built locally using the setup
+   [instructions](../README.md#Setup), you can run `source setup_env.sh`
 
-The default build type is RELEASE to compile optimized code.
-The resulting executable is in `build/resizer`.
+## Designs
+Sample design configurations are available in the `designs` directory. You can
+select a design using either of the following methods:
+1. The flow [Makefile](Makefile) contains a list of sample design configurations
+   at the top of the file. Uncomment the respective line to select the design
+2. Specify the design using the shell environment, e.g.
+   `make DESIGN_CONFIG=./designs/nangate45/swerv.mk` or
+   `export DESIGN_CONFIG=./designs/nangate45/swerv.mk; make`
+By default, the simple design gcd is selected. We recommend implementing this
+design first to validate your flow and tool setup.
 
-Optional CMake variables passed as -D<var>=<value> arguments to CMake are show below.
+### Adding a New Design
+To add a new design, we recommend looking at the included designs for examples
+of how to set one up.
+
+:warning: Please refer to the known issues and limitations
+[document](docs/Known%20Issues%20and%20Limitations.pdf) for information on
+conditioning your design/files for the flow. We are working to reduce the issues
+and limitations, but it will take time.
+
+
+## Platforms
+OpenROAD-flow supports Verilog to GDS for the following open platforms:
+* Nangate45 / FreePDK45
+
+These platforms have a permissive license which allows us to redistribute the
+PDK and OpenROAD platform-specific files. The platform files and license(s) are
+located in `platforms/{platform}`.
+
+OpenROAD-flow also supports the following commercial platforms:
+* TSMC65LP
+* GF14 (in progress)
+
+The PDKs and platform-specific files for these kits cannot be provided due to
+NDA restrictions. However, if you are able to access these platforms, you can
+create the necessary platform-specific files yourself.
+
+Once the platform is setup. Create a new design configuration with information
+about the design. See sample configurations in the `design` directory.
+
+
+### Adding a New Platform
+At this time, we recommend looking at the [Nangate45](platforms/nangate45) as an
+example of how to set up a new platform for OpenROAD-flow.
+
+## Implement the Design
+Run `make` to perform Verilog to GDS. The final output will be located at
+`flow/results/{platform}/{design_name}/6_final.gds`
+
+## Miscellaneous
+### tiny-tests - easy to add, single concern, single Verilog file
+
+The tiny-tests are have been designed with two design goals in mind:
+
+1. It should be trivial to add a new test: simply add a tiny standalone
+   Verilog file to `OpenROAD-flow/flow/designs/src/tiny-tests`
+2. Each test should be as small and as standalone as possible and be a single
+   concern test.
+
+To run a test:
 
 ```
-CMAKE_BUILD_TYPE DEBUG|RELEASE
-CMAKE_CXX_FLAGS - additional compiler flags
-TCL_LIB - path to tcl library
-TCL_HEADER - path to tcl.h
-ZLIB_ROOT - path to zlib
-CMAKE_INSTALL_PREFIX
+make DESIGN_NAME=SmallPinCount DESIGN_CONFIG=`pwd`/designs/tiny-tests.mk
 ```
 
-The default install directory is `/usr/local`.
-To install in a different directory with CMake use:
+### nangate45 smoke-test harness for top level Verilog designs
+
+1. Drop your Verilog files into designs/src/harness
+2. Start the workflow:
 
 ```
-cmake .. -DCMAKE_INSTALL_PREFIX=<prefix_path>
+make DESIGN_NAME=TopLevelName DESIGN_CONFIG=`pwd`/designs/harness.mk
 ```
 
-Alternatively, you can use the `DESTDIR` variable with make.
-
-```
-make DESTDIR=<prefix_path> install
-```
-
-There are a set of regression tests in `/test`.
-
-```    
-test/regression
-src/resizer/test/regression
-```
-
-## Quickstart
-
-```
-openroad
-    -help              show help and exit
-    -version           show version and exit
-    -no_init           do not read .openroad init file
-    -no_splash         do not show the license splash at startup
-    -exit              exit after reading cmd_file
-    cmd_file           source cmd_file
-```
-
-OpenROAD sources the TCL command file `~/.openroad` unless the command
-line option `-no_init` is specified.
-
-OpenROAD then sources the command file cmd_file. Unless the `-exit`
-command line flag is specified it enters and interactive TCL command
-interpreter.
-
-OpenROAD is run using TCL scripts. The following commands are used to read
-and write design data.
-
-
-```
-read_lef [-tech] [-library] filename
-read_def filename
-write_def [-version 5.8|5.6|5.5|5.4|5.3] filename
-read_verilog filename
-write_verilog filename
-read_db filename
-write_db filename
-```
-
-OpenROAD can be used to make a OpenDB database from LEF/DEF, or
-Verilog (flat or hierarchical). Once the database is made it can be
-saved as a file with the `write_db` command. OpenROAD can then read
-the database with the `read_db` command without reading LEF/DEF or
-Verilog.
-
-The `read_lef` and `read_def` commands can be used to build an OpenDB
-database as shown below. The `read_lef -tech` flag reads the
-technology portion of a LEF file.  The `read_lef -library` flag reads
-the MACROs in the LEF file.  If neither of the `-tech` and `-library`
-flags are specified they default to `-tech -library` if no technology
-has been read and `-library` if a technology exists in the database.
-
-```
-read_lef liberty1.lef
-read_def reg1.def
-# Write the db for future runs.
-write_db reg1.db
-```
-
-The `read_verilog` command is used to build an OpenDB database as
-shown below. Multiple verilog files for a hierarchical design can be
-read.  The `link_design` command is used to flatten the design
-and make a database.
-
-```
-read_lef liberty1.lef
-read_verilog reg1.v
-link_design top
-# Write the db for future runs.
-write_db reg1.db
-```
+TIP! Start with a small tiny submodule in your design with few pins
