@@ -465,6 +465,28 @@ set_output_delay -clock clk 0 out
 report_checks
 ```
 
+### MacroPlace
+
+TritonMacroPlace [https://github.com/The-OpenROAD-Project/TritonMacroPlace](https://github.com/The-OpenROAD-Project/TritonMacroPlace)
+
+```
+macro_placement -global_config <global_config_file>
+```
+* __global_config__ : Set global config file loction. [string]
+
+#### Global Config Example
+```
+set ::HALO_WIDTH_V 1
+set ::HALO_WIDTH_H 1
+set ::CHANNEL_WIDTH_V 0
+set ::CHANNEL_WIDTH_H 0
+```
+* __HALO_WIDTH_V__ : Set macro's vertical halo. [float; unit: micron]
+* __HALO_WIDTH_H__ : Set macro's horizontal halo. [float; unit: micron]
+* __CHANNEL_WIDTH_V__ : Set macro's vertical channel width. [float; unit: micron]
+* __CHANNEL_WIDTH_H__ : Set macro's horizontal channel width. [float; unit: micron]
+
+
 ### Tapcell
 
 Tapcell and endcap insertion.
