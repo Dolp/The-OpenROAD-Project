@@ -465,6 +465,28 @@ set_output_delay -clock clk 0 out
 report_checks
 ```
 
+### MacroPlace
+
+TritonMacroPlace [https://github.com/The-OpenROAD-Project/TritonMacroPlace](https://github.com/The-OpenROAD-Project/TritonMacroPlace)
+
+```
+macro_placement -global_config <global_config_file>
+```
+* __global_config__ : Set global config file loction. [string]
+
+#### Global Config Example
+```
+set ::HALO_WIDTH_V 1
+set ::HALO_WIDTH_H 1
+set ::CHANNEL_WIDTH_V 0
+set ::CHANNEL_WIDTH_H 0
+```
+* __HALO_WIDTH_V__ : Set macro's vertical halo. [float; unit: micron]
+* __HALO_WIDTH_H__ : Set macro's horizontal halo. [float; unit: micron]
+* __CHANNEL_WIDTH_V__ : Set macro's vertical channel width. [float; unit: micron]
+* __CHANNEL_WIDTH_H__ : Set macro's horizontal channel width. [float; unit: micron]
+
+
 ### Tapcell
 
 Tapcell and endcap insertion.
@@ -495,18 +517,39 @@ You can find script examples for both 45nm/65nm and 14nm in `tapcell/etc/scripts
 
 ### Global Placement
 
-RePlAce global placement.
+RePlAce global placement. [https://github.com/The-OpenROAD-Project/RePlAce](https://github.com/The-OpenROAD-Project/RePlAce)
 
 ```
-global_placement [-timing_driven]
-             [-bin_grid_count grid_count]
+global_placement -skip_initial_place
+                 -incremental
+                 -bin_grid_count <grid_count>
+                 -density <density>
+                 -init_density_penalty <init_density_penalty>
+                 -init_wirelength_coef <init_wirelength_coef>
+                 -min_phi_coef <min_phi_coef>
+                 -max_phi_coef <max_phi_coef>
+                 -overflow <overflow>
+                 -initial_place_max_iter <max_iter>
+                 -initial_place_max_fanout <max_fanout>
+                 -verbose_level <level>
 ```
+#### Flow Control
+- __skip_initial_place__ : Skip the initial placement (BiCGSTAB solving) before Nesterov placement. IP improves HPWL by ~5% on large designs. Equal to '-initial_place_max_iter 0'
+- __incremental__ : Enable the incremental global placement. Users would need to tune other parameters (e.g. init_density_penalty) with pre-placed solutions. 
 
-- **timing_driven**: Enable timing-driven mode.
-- **grid_count**: [64,128,256,512,..., int]. Default: Defined by internal algorithm.
+#### Tuning Parameters
+- __bin_grid_count__ : Set bin grid's counts. Default: Defined by internal algorithm. [64,128,256,512,..., int]
+- __density__ : Set target density. Default: 0.70 [0-1, float]
+- __init_density_penalty__ : Set initial density penalty. Default: 8e-5 [1e-6 - 1e6, float]
+- __init_wire_length__coef__ : Set initial wirelength coefficient. Default: 0.25 [unlimited, float] 
+- __min_phi_coef__ : Set pcof_min(µ_k Lower Bound). Default: 0.95 [0.95-1.05, float]
+- __max_phi_coef__ : Set pcof_max(µ_k Upper Bound). Default: 1.05 [1.00-1.20, float]
+- __overflow__ : Set target overflow for termination condition. Default: 0.1 [0-1, float]
+- __initial_place_max_iter__ : Set maximum iterations in initial place. Default: 20 [0-, int]
+- __initial_place_max_fanout__ : Set net escape condition in initial place when 'fanout >= initial_place_max_fanout'. Default: 200 [1-, int]
 
-Use the `set_wire_rc` command to set resistance and capacitance of
-estimated wires used for timing.
+#### Other Options
+- __verbose_level__ : Set verbose level for RePlAce. Default: 1 [0-10, int]
 
 ### Detailed Placement
 
