@@ -63,7 +63,7 @@ cd OpenROAD-flow/flow
 ```
 
 2. Setup your shell environment. The `openroad` app must be setup to implement designs or run tests. See setup
-   instructions in the repository [Verify Installation](#Verify-Installation) section above.
+   instructions in the repository *Verify Installation* section above.
 
 
 ## Designs
@@ -83,7 +83,7 @@ To add a new design, we recommend looking at the included designs for examples
 of how to set one up.
 
 :warning: Please refer to the known issues and limitations
-[document](docs/Known%20Issues%20and%20Limitations.pdf) for information on
+[document](https://github.com/The-OpenROAD-Project/OpenROAD-flow/blob/openroad/flow/docs/Known%20Issues%20and%20Limitations.pdf) for information on
 conditioning your design/files for the flow. We are working to reduce the issues
 and limitations, but it will take time.
 
@@ -109,7 +109,7 @@ about the design. See sample configurations in the `design` directory.
 
 
 ### Adding a New Platform
-At this time, we recommend looking at the [Nangate45](platforms/nangate45) as an
+At this time, we recommend looking at the [Nangate45](https://github.com/The-OpenROAD-Project/OpenROAD-flow/tree/openroad/flow/platforms/nangate45) as an
 example of how to set up a new platform for OpenROAD-flow.
 
 ## Implement the Design
