@@ -1,13 +1,16 @@
 steps:
 - name: gcr.io/cloud-builders/git
   entrypoint: 'bash'
+  env: ['GIT_DISCOVERY_ACROSS_FILESYSTEM=1']
   args:
     - '-c'
     - 'git status'
 - name: gcr.io/cloud-builders/git
+  env: ['GIT_DISCOVERY_ACROSS_FILESYSTEM=1']
   args:
     - 'status'
 - name: gcr.io/cloud-builders/git
+  env: ['GIT_DISCOVERY_ACROSS_FILESYSTEM=1']
   args:
     - 'submodule'
     - 'update'
