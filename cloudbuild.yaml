@@ -1,5 +1,10 @@
 steps:
 - name: gcr.io/cloud-builders/git
+  entrypoint: 'bash'
+  args:
+    - '-c'
+    - 'git status'
+- name: gcr.io/cloud-builders/git
   args:
     - 'status'
 - name: gcr.io/cloud-builders/git
