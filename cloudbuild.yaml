@@ -1,9 +1,4 @@
 steps:
-- name: 'gcr.io/cloud-builders/wget'
-  args:
-    - '--header=Metadata-Flavor: Google'
-    - '-Oaccess_token'
-    - 'http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token'
 - name: 'gcr.io/cloud-builders/docker'
   args:
     - 'build'
