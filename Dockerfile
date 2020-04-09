@@ -72,4 +72,5 @@ COPY . /OpenROAD
 WORKDIR /OpenROAD
 
 # Build
+RUN git submodule update --init --recursive
 RUN cmake -B build . && cmake --build build -j 4
