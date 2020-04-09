@@ -10,7 +10,7 @@ steps:
   entrypoint: 'bash'
   args:
     - '-c'
-    - 'ls'
+    - 'ls -a'
 - name: gcr.io/cloud-builders/git
   env: ['GIT_DISCOVERY_ACROSS_FILESYSTEM=1']
   args:
