@@ -6,7 +6,7 @@ steps:
     - '-c'
     - |
       git init
-      git clean -d -f .
+      git clean -x -d -f .
       git remote add origin https://github.com/The-OpenROAD-Project/OpenROAD.git
       git fetch origin $BRANCH_NAME
       git checkout $COMMIT_SHA
