@@ -10,6 +10,7 @@ steps:
       git remote add origin https://github.com/The-OpenROAD-Project/OpenROAD.git
       git fetch origin $BRANCH_NAME
       git checkout $COMMIT_SHA
+      git submodule update --init --recursive
 - name: 'gcr.io/cloud-builders/docker'
   args:
     - 'build'
