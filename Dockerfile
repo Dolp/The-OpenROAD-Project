@@ -54,7 +54,7 @@ RUN git clone https://gitlab.com/libeigen/eigen.git \
     && mkdir build \
     && cd build \
     && cmake .. \
-    && make install
+    && make install -j $(nproc)
 
 # lemon required by TritonCTS (no package for CentOS!)
 #  (On Ubuntu liblemon-dev can be used instead)
@@ -72,4 +72,4 @@ COPY . /OpenROAD
 WORKDIR /OpenROAD
 
 # Build
-RUN cmake -B build . && cmake --build build -j 4
+RUN cmake -B build . && cmake --build build -j $(nproc)
