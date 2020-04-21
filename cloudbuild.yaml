@@ -4,20 +4,12 @@ steps:
   env: ['GIT_DISCOVERY_ACROSS_FILESYSTEM=1']
   args:
     - '-c'
-    - 'pwd'
-- name: gcr.io/cloud-builders/git
-  env: ['GIT_DISCOVERY_ACROSS_FILESYSTEM=1']
-  entrypoint: 'bash'
-  args:
-    - '-c'
-    - 'ls -a'
-- name: gcr.io/cloud-builders/git
-  env: ['GIT_DISCOVERY_ACROSS_FILESYSTEM=1']
-  args:
-    - 'submodule'
-    - 'update'
-    - '--init'
-    - '--recursive'
+    - |
+      git init
+      git clean -d -f .
+      git remote add origin https://github.com/The-OpenROAD-Project/OpenROAD.git
+      git fetch origin $BRANCH_NAME
+      git checkout $COMMIT_SHA
 - name: 'gcr.io/cloud-builders/docker'
   args:
     - 'build'
