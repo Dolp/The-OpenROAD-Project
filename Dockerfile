@@ -72,4 +72,5 @@ COPY . /OpenROAD
 WORKDIR /OpenROAD
 
 # Build
+RUN echo $(nproc)
 RUN cmake -B build . && cmake --build build -j $(nproc)

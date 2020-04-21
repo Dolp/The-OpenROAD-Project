@@ -11,6 +11,7 @@ steps:
       git fetch origin $BRANCH_NAME
       git checkout $COMMIT_SHA
       git submodule update --init --recursive
+      echo $(nproc)
 - name: 'gcr.io/cloud-builders/docker'
   args:
     - 'build'
