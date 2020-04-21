@@ -19,6 +19,7 @@ steps:
     - '.'
 options:
  diskSizeGb: 200
+ machineType: 'N1_HIGHCPU_8'
 timeout: '7200s'
 substitutions:
   _GCR_ZONE: 'gcr.io'
