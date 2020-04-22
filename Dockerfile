@@ -72,4 +72,4 @@ COPY . /OpenROAD
 WORKDIR /OpenROAD
 
 # Build
-RUN cmake -B build . && cmake --build build -j $(nproc)
+RUN cmake -B build . && time cmake --build build -j $(nproc)
