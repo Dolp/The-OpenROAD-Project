@@ -160,24 +160,6 @@ namespace eval ICeWall {
       return [list x $x y $y]
   }
 
-  proc get_orient {padcell {element "cell"}} {
-    variable footprint
-    variable library
-    
-    set side_name [get_side_name $padcell]
-    if {[dict exists $footprint padcells $side_name $padcell $element orient]} {
-      set orient [dict get $footprint padcells $side_name $padcell $element orient]
-    } else {
-      if {$element == "cell"} {
-        set cell_type [dict get $library types [get_pad_type $padcell]]
-      } else {
-        set cell_type [dict get $library types $element]
-      }
-      # debug "cell_type $cell_type orient $side_name"
-      set orient [dict get $library cells $cell_type orient $side_name]
-    }
-  }
-  
   proc update_location_data {padcell} {
     variable def_units
     variable bondpad_width
@@ -192,8 +174,8 @@ namespace eval ICeWall {
       set orient [dict get $inst cell orient]
     } else {
       set inst [dict get $footprint padcells $side_name $padcell]
-      set cell_type [dict get $library types [get_pad_type $padcell]]
-      set orient [get_orient $padcell]
+      set cell_type [dict get $library types [get_padcell_type $padcell]]
+      set orient [get_padcell_orient $padcell]
     }
 
     if {[dict exists $library cells $cell_type]} {
@@ -235,7 +217,7 @@ namespace eval ICeWall {
           y [expr round([dict get $inst bondpad centre y] * $def_units)] \
         ]
 
-        dict set inst bondpad scaled_origin [get_origin $centre $bondpad_width $bondpad_height [get_orient $padcell bondpad]]
+        dict set inst bondpad scaled_origin [get_origin $centre $bondpad_width $bondpad_height [get_padcell_orient $padcell bondpad]]
         dict set inst bondpad scaled_centre $centre
       } elseif {[dict exists $inst bondpad origin]} {
         set origin [list \
@@ -244,7 +226,7 @@ namespace eval ICeWall {
         ]
         
         dict set inst bondpad scaled_origin $origin
-        dict set inst bondpad scaled_origin [get_centre $origin $bondpad_width $bondpad_height [get_orient $padcell bondpad]]
+        dict set inst bondpad scaled_origin [get_centre $origin $bondpad_width $bondpad_height [get_padcell_orient $padcell bondpad]]
       }
     }
     
@@ -312,8 +294,8 @@ namespace eval ICeWall {
 
       foreach padcell [dict keys [dict get $footprint padcells $side_name]] {
         # Ensure instance exists in the design
-        set name [get_inst_name $padcell]
-        set type [get_pad_type $padcell]
+        set name [get_padcell_inst_name $padcell]
+        set type [get_padcell_type $padcell]
         set cell [get_cell $type $side_name]
         if {[set inst [$block findInst $name]] == "NULL"} {
           if {[is_physical_only $type]} { 
@@ -357,26 +339,32 @@ namespace eval ICeWall {
     close $ch
   }
   
-  proc get_side_name {padcell} {
+  proc get_die_area {} {
     variable footprint
     
-    if {[dict exists $footprint side $padcell]} {
-      return [dict get $footprint side $padcell]
+    return [dict get $footprint die_area]
+  }
+
+  proc get_padcell_side_name {padcell} {
+    variable footprint
+    
+    if {[dict exists $footprint padcell $padcell side_name]} {
+      return [dict get $footprint padcell $padcell side_name]
     }
     # debug "Side none for $padcell"
     return "none"
   }
   
-  proc get_pad_type {padcell} {
+  proc get_padcell_type {padcell} {
     variable footprint
     
-    return [dict get $footprint padcells [get_side_name $padcell] $padcell type]
+    return [dict get $footprint padcell $padcell type]
   }
   
-  proc get_inst_name {padcell} {
+  proc get_padcell_inst_name {padcell} {
     variable footprint
     
-    set info [dict get $footprint padcells [get_side_name $padcell] $padcell]
+    set info [dict get $footprint padcell $padcell]
     if {[dict exists $info pad_inst_name]} {
       return [format [dict get $info pad_inst_name] [get_name $padcell $info]]
     }
@@ -388,10 +376,10 @@ namespace eval ICeWall {
     return "u_[get_name $padcell $info]"
   }
   
-  proc get_pin_name {padcell {info {}}} {
+  proc get_padcell_pin_name {padcell {info {}}} {
     variable footprint
     
-    set info [dict get $footprint padcells [get_side_name $padcell] $padcell]
+    set info [dict get $footprint padcell $padcell]
     if {[dict exists $info pad_pin_name]} {
       return [format [dict get $info pad_pin_name] [get_name $padcell $info]]
     }
@@ -410,6 +398,109 @@ namespace eval ICeWall {
     return "$padcell"
   }
   
+  proc get_cell_master {name} {
+    variable db
+
+    if {[set cell [$db findMaster $name]] != "NULL"} {return $cell}
+    
+    critical 8 "Cannot find cell $name in the database"
+  }
+
+  proc get_padcell_orient {padcell {element "cell"}} {
+    variable footprint
+    variable library
+    
+    set side_name [get_side_name $padcell]
+    if {[dict exists $footprint padcells $side_name $padcell $element orient]} {
+      set orient [dict get $footprint padcells $side_name $padcell $element orient]
+    } else {
+      if {$element == "cell"} {
+        set cell_type [dict get $library types [get_padcell_type $padcell]]
+      } else {
+        set cell_type [dict get $library types $element]
+      }
+      # debug "cell_type $cell_type orient $side_name"
+      set orient [dict get $library cells $cell_type orient $side_name]
+    }
+  }
+  
+  proc get_cell_orientation {name position} {
+    variable library 
+    
+    return [dict get $library cells $name orient $position]
+  }
+
+  proc get_cell {type {side "none"}} {
+    variable library 
+
+    set type_name [dict get $library types $type]
+    
+    if {[dict exists $library cells $type_name cell_name]} {
+      return [get_cell_master [dict get $library cells $type_name cell_name $side]]
+    } else {
+      return [get_cell_master $type_name]
+    }
+  }
+
+  proc get_cells {type side} {
+    variable library 
+
+    set cell_list {}
+    foreach type_name [dict get $library types $type] {
+      if {[dict exists $library cells $type_name cell_name]} {
+        dict set cell_list $type_name master [get_cell_master [dict get $library cells $type_name cell_name $side]]
+      } else {
+        dict set cell_list $type_name master [get_cell_master $type_name]
+      }
+    }
+    return $cell_list
+  }
+
+  proc get_tracks {} {
+    variable footprint 
+
+    if {![dict exists $footprint tracks]} {
+      dict set floorplan tracks "tracks.info"
+    }
+
+    if {![file exists [dict get $footprint tracks]]} {
+      write_track_file [dict get $footprint tracks] [dict get $footprint core_area]
+    }
+    
+    return [dict get $footprint tracks]
+  }
+
+  proc get_pad_pin_name {} {
+    variable library
+
+    if {[dict exists $library pad_pin_name]} {
+      return [dict get $library pad_pin_name]
+    }
+
+    return "PAD"
+  }
+
+  proc get_pad_pin_layer {} {
+    variable library
+    variable footprint
+
+    if {[dict exists $footprint pin_layer]} {
+      return [dict get $footprint pin_layer]
+    }
+
+    if {[dict exists $library pad_pin_layer]} {
+      return [dict get $library pad_pin_layer]
+    }
+
+    foreach layer [lreverse [$tech getLayers]] {
+      if {[$layer getType] == "ROUTING"} {
+        return [$layer getName]
+      }
+    }
+
+    return [[lindex [$tech getTechLayers] end] getName]
+  }
+
   proc assign_signals {signal_assignment_file} {
     variable footprint
     
@@ -429,8 +520,7 @@ namespace eval ICeWall {
       set found 0
       foreach side "bottom right top left" {
         if {[dict exists $footprint padcells $side $pad_name]} {
-          # debug "Assigning $signal_name to $pad_name"
-          dict set footprint padcells $side $pad_name name "$signal_name"
+          set_signal_name $pad_name $signal_name
           dict for {key value} [lrange $line 2 end] {
             dict set footprint padcells $side $pad_name $key $value
           }
@@ -481,41 +571,46 @@ namespace eval ICeWall {
 
     # Allow us to lookup which side a padcell is placed on.
     foreach side_name {bottom right top left} { 
+      if {[dict exists $footprint padcells $side_name]} {
       foreach padcell [dict keys [dict get $footprint padcells $side_name]] {
+        dict set footprint padcell $padcell [dict get $footprint padcells $side_name $padcell]
+        if {![dict exists $footprint padcell $padcell side]} {
+          dict set footprint padcell $padcell side $side_name
+        }
         dict set footprint side $padcell $side_name
+      }
+    }
+    # Lookup side assignment
+    foreach padcell [dict keys [dict get $footprint padcell]] {
+      if {![dict exists $footprint padcell $padcell side]} {
+        set x [dict get $footprint padcell $padcell centre x]
+        set y [dict get $footprint padcell $padcell centre y]
+        switch [get_quadrant $x $y] {
+          "b" {set side_name bottom}
+          "r" {set side_name right}
+          "t" {set side_name top}
+          "l" {set side_name left}
+        }
+        dict set footprint padcell $padcell side $side_name
       }
     }
   }
   
-  proc get_tracks {} {
-    variable footprint 
-
-    if {![dict exists $footprint tracks]} {
-      dict set floorplan tracks "tracks.info"
-    }
-
-    if {![file exists [dict get $footprint tracks]]} {
-      write_track_file [dict get $footprint tracks] [dict get $footprint core_area]
-    }
-    
-    return [dict get $footprint tracks]
-  }
-
   proc get_abutment_nets {padcell {idx 0}} {
     variable footprint
     variable library
     variable block
     
     set abutment_nets {}
+    return $abutment_nets
     if {[dict exists $library connect_by_abutment]} {
       set breakers {}
       if {[dict exists $library breakers]} {
         set breakers [dict get $library breakers]
       }
-      set side_name [dict get $footprint side $padcell]
-      set type [get_pad_type $padcell]
+      set type [get_padcell_type $padcell]
       set cell_type [dict get $library types $type]
-      set inst_name [get_inst_name $padcell]
+      set inst_name [get_padcell_inst_name $padcell]
       set inst [$block findInst $inst_name]
 
       foreach pin [dict get $library connect_by_abutment] {
@@ -558,7 +653,168 @@ namespace eval ICeWall {
     }
   }
 
-  proc fill_between_padcells {} {
+  proc add_physical_pin {padcell inst} {
+    variable library
+    variable block
+    variable tech
+
+    set term [$block findBTerm [get_padcell_pin_name $padcell]]
+    if {$term != "NULL"} {
+      set net [$term getNet]
+      foreach iterm [$net getITerms] {
+        $iterm setSpecial
+      }
+      $term setSpecial
+      $net setSpecial
+      set swire [odb::dbSWire_create $net "FIXED"]
+
+      set pin [odb::dbBPin_create $term]
+      set layer [$tech findLayer [get_pad_pin_layer]]
+
+      if {[set mterm [[$inst getMaster] findMTerm [get_pad_pin_name]]] == "NULL"} {
+        err 99 "Cannot find pin [get_pad_pin_name] on cell [[$inst getMaster] getName]"
+        return 0
+      } else {
+        set mpin [lindex [$mterm getMPins] 0]
+        foreach geometry [$mpin getGeometry] {
+          if {[[$geometry getTechLayer] getName] == [get_pad_pin_layer]} {
+            set pin_box [pdngen::transform_box [$geometry xMin] [$geometry yMin] [$geometry xMax] [$geometry yMax] [$inst getOrigin] [$inst getOrient]]
+            odb::dbBox_create $pin $layer {*}$pin_box
+            $pin setPlacementStatus "FIRM"
+
+            return 1
+          }
+        } 
+        if {[[$geometry getTechLayer] getName] != [get_pad_pin_layer]} {
+          err 98 "Cannot find shape on layer [get_pad_pin_layer] for [$inst getName]:[[$inst getMaster] getName]:[$mterm getName]"
+          return 0
+        }
+      }
+    }
+    if {[get_padcell_type $padcell] == "sig"} {
+      err 4 "Cannot find a terminal [get_padcell_pin_name $padcell] for ${padcell}" 
+    }
+  }
+
+  proc place_bondpads {} {
+    variable footprint
+
+    foreach side_name {bottom right top left} {
+      set cell [get_cell bondpad $side_name]
+      foreach padcell [dict get $footprint padcells order $side_name] {
+        set signal_name [get_padcell_inst_name $padcell]
+        set side_name [get_side_name $padcell]
+        set type [get_padcell_type $padcell]
+        
+        if {[dict exists $footprint padcells $side_name $padcell bondpad]} {
+          # Padcells have separate bondpads that need to be added to the design
+          set x [dict get $footprint padcells $side_name $padcell bondpad scaled_origin x]
+          set y [dict get $footprint padcells $side_name $padcell bondpad scaled_origin y]
+          set inst [odb::dbInst_create $block $cell "bp_${signal_name}"]
+
+          $inst setOrigin $x $y
+          $inst setOrient [get_padcell_orient $padcell bondpad]
+          $inst setPlacementStatus "FIRM"
+        }
+      }
+    }
+  }
+
+  proc set_signal_name {padcell signal_name} {
+    variable footprint
+
+    # debug "Assigning $signal_name to $pad_name"
+    dict set footprint padcell $pad_name signal_name "$signal_name"
+  }
+
+  proc get_padcell_signal_name {padcell} {
+    variable fooprint
+
+    return [dict get $footprint padcell $padcell signal_name]
+  }
+
+  proc get_footprint_die_size_x {} {
+    variable footprint
+
+    return [expr [lindex [dict get $footprint die_size] 2] - [lindex [dict get $footprint die_size] 0]]
+  }
+
+  proc get_footprint_die_size_y {} {
+    variable footprint
+
+    return [expr [lindex [dict get $footprint die_size] 3] - [lindex [dict get $footprint die_size] 1]]
+  }
+
+  proc get_footprint_bump_pitch {} {
+    variable footprint
+
+    return [dict get $footprint bump_pitch]
+  }
+
+  proc get_min_bump_to_die_edge_spacing {} {
+    variable footprint
+
+    if {[dict exists $floorplan bump_to_edge_spacing]} {
+      return [dict get $floorplan bump_to_edge_spacing]
+    }
+
+    variable library
+    if {![dict exists $library bump_to_edge_spacing]} {
+      return [dict get $library bump_to_edge_spacing]
+    }
+
+    critical 98 "Value of bump_to_edge_spacing not specified"
+  }
+
+  proc init_rdl {} {
+    variable library
+
+    variable num_bumps_x
+    variable num_bumps_y
+    variable actual_offset_x
+    variable actual_offset_y
+
+    set die_size_x [get_footprint_die_size_x]
+    set die_size_y [get_footprint_die_size_y]
+    set min_bump_to_die_edge_spacing [get_min_bump_to_die_edge_spacing]
+    set pitch [get_footprint_bump_pitch]
+
+    set available_bump_space_x [expr $die_size_x - 2 * $min_bump_to_die_edge_spacing]
+    set available_bump_space_y [expr $die_size_y - 2 * $min_bump_to_die_edge_spacing]
+    set num_bumps_x [expr round(1.0 * $available_bump_space_x / $pitch)]
+    set num_bumps_y [expr round(1.0 * $available_bump_space_y / $pitch)]
+    set actual_offset_x [expr ($die_size_x - $num_bumps_x * $pitch) / 2]
+    set actual_offset_y [expr ($die_size_y - $num_bumps_y * $pitch) / 2]
+  }
+
+  proc assign_padcell_to_bump {padcell row col} {
+    variable footprint
+
+    dict set footprint $padcell bump_location $row $col 1
+    dict set footprint bump_location $row $col $padcell
+    dict set x [expr $actual_offset_x + $col * $pitch]
+    dict set y [expr $actual_offset_y + $row * $pitch]
+  }
+
+  proc place_bumps {} {
+    variable footprint
+
+    set cell [get_cell bump]
+    for {set row 0} {$row < $num_bumps_y} {incr row} {
+      for {set col 0} {$col < $num_bumps_x} {incr col} {
+        set x [dict get $footprint padcells $padcell bump scaled_origin x]
+        set y [dict get $footprint padcells $padcell bump scaled_origin y]
+        set signal_name [get_padcell_signal_name $padcell]
+        set inst [odb::dbInst_create $block $cell "bump_${row}_${col}_${signal_name}"]
+
+        $inst setOrigin $x $y
+        $inst setOrient "R0"
+        $inst setPlacementStatus "FIRM"
+      }
+    }
+  }
+
+  proc place_padring {} {
     variable block
     variable tech
     variable chip_width 
@@ -593,8 +849,8 @@ namespace eval ICeWall {
       # debug "$side_name: fill_end   = $fill_end"
 
       foreach padcell [dict get $footprint padcells order $side_name] {
-        set name [get_inst_name $padcell]
-        set type [get_pad_type $padcell]
+        set name [get_padcell_inst_name $padcell]
+        set type [get_padcell_type $padcell]
         set cell [get_cell $type $side_name]
 
         set cell_height [expr max([$cell getHeight],[$cell getWidth])]
@@ -609,8 +865,11 @@ namespace eval ICeWall {
         set y [dict get $footprint padcells $side_name $padcell cell scaled_origin y]
         
         $inst setOrigin $x $y
-        $inst setOrient [get_orient $padcell]
+        $inst setOrient [get_padcell_orient $padcell]
         $inst setPlacementStatus "FIRM"
+
+        add_physical_pin $padcell $inst
+
         set bbox [$inst getBBox]
 
         switch $side_name \
@@ -655,69 +914,32 @@ namespace eval ICeWall {
         "left" {
           fill_box [$bbox xMin] $fill_end [$bbox xMax] $fill_start $side_name [get_abutment_nets $padcell 1]
         }
-
-      foreach padcell [dict get $footprint padcells order $side_name] {
-        set signal_name [get_inst_name $padcell]
-        set side_name [get_side_name $padcell]
-        set type [get_pad_type $padcell]
-        
-        if {[dict exists $footprint padcells $side_name $padcell bondpad]} {
-          # Padcells have separate bondpads that need to be added to the design
-          set x [dict get $footprint padcells $side_name $padcell bondpad scaled_origin x]
-          set y [dict get $footprint padcells $side_name $padcell bondpad scaled_origin y]
-          set cell [get_cell bondpad $side_name]
-          set inst [odb::dbInst_create $block $cell "bp_${signal_name}"]
-
-          $inst setOrigin $x $y
-          $inst setOrient [get_orient $padcell bondpad]
-          $inst setPlacementStatus "FIRM"
-
-          set term [$block findBTerm [get_pin_name $padcell]]
-          if {$term != "NULL"} {
-            set net [$term getNet]
-            foreach iterm [$net getITerms] {
-              $iterm setSpecial
-            }
-            $net setSpecial
-
-            set pin [odb::dbBPin_create $term]
-            set layer [$tech findLayer [dict get $footprint pin_layer]]
-            set x [dict get $footprint padcells $side_name $padcell bondpad scaled_centre x]
-            set y [dict get $footprint padcells $side_name $padcell bondpad scaled_centre y]
-            odb::dbBox_create $pin $layer [expr $x - [$layer getWidth] / 2] [expr $y - [$layer getWidth] / 2] [expr $x + [$layer getWidth] / 2] [expr $y + [$layer getWidth] / 2]
-            $pin setPlacementStatus "FIRM"
-          } else {
-            if {$type == "sig"} {
-              err 4 "Cannot find a terminal [get_pin_name $padcell] for ${signal_name} to associate with bondpad bp_${signal_name}"
-            }
-          }
-        }
-      }
     }
+
     dict set pad_ring corner_ll [set inst [odb::dbInst_create $block [set corner [get_cell corner ll]] "CORNER_LL"]]
     $inst setOrigin $edge_left_offset $edge_bottom_offset
     $inst setOrient [get_cell_orientation [$corner getName] ll]
 
     $inst setPlacementStatus "FIRM"
-    connect_abutment_nets $inst [get_abutment_nets [lindex [dict get $footprint padcells order "bottom"] 0]]
+    # connect_abutment_nets $inst [get_abutment_nets [lindex [dict get $footprint padcells order "bottom"] 0]]
 
     dict set pad_ring corner_lr [set inst [odb::dbInst_create $block [set corner [get_cell corner lr]] "CORNER_LR"]]
     $inst setOrigin [expr ($chip_width - $edge_right_offset)] $edge_bottom_offset
     $inst setOrient "R90"
     $inst setPlacementStatus "FIRM"
-    connect_abutment_nets $inst [get_abutment_nets [lindex [dict get $footprint padcells order "right"] 0]]
+    # connect_abutment_nets $inst [get_abutment_nets [lindex [dict get $footprint padcells order "right"] 0]]
 
     dict set pad_ring corner_ur [set inst [odb::dbInst_create $block [set corner [get_cell corner ur]] "CORNER_UR"]]
     $inst setOrigin [expr ($chip_width - $edge_right_offset)] [expr ($chip_height - $edge_top_offset)]
     $inst setOrient "R180"
     $inst setPlacementStatus "FIRM"
-    connect_abutment_nets $inst [get_abutment_nets [lindex [dict get $footprint padcells order "top"] 0]]
+    # connect_abutment_nets $inst [get_abutment_nets [lindex [dict get $footprint padcells order "top"] 0]]
 
     dict set pad_ring corner_ul [set inst [odb::dbInst_create $block [set corner [get_cell corner ul]] "CORNER_UL"]]
     $inst setOrigin $edge_left_offset [expr ($chip_height - $edge_top_offset)]
     $inst setOrient "R270"
     $inst setPlacementStatus "FIRM"
-    connect_abutment_nets $inst [get_abutment_nets [lindex [dict get $footprint padcells order "left"] 0]]
+    # connect_abutment_nets $inst [get_abutment_nets [lindex [dict get $footprint padcells order "left"] 0]]
   }  
   
   proc place_additional_cells {} {
@@ -768,10 +990,10 @@ namespace eval ICeWall {
       }
 
       foreach padcell [dict get $footprint full_order] {
-        set side_name [dict get $footprint side $padcell]
+        set side_name [get_padcell_side_name $padcell]
 
-        set name [get_inst_name $padcell]
-        set type [get_pad_type $padcell]
+        set name [get_padcell_inst_name $padcell]
+        set type [get_padcell_type $padcell]
 
         if {[set brk_idx [lsearch $breaker_types $type]] > -1} {
           set breaker [dict get $library types [lindex $breaker_types $brk_idx]]
@@ -779,13 +1001,13 @@ namespace eval ICeWall {
           foreach signal [dict get $library connect_by_abutment] {
             if {[lsearch [dict keys $signal_breaks] $signal] > -1} {
               set cur_index [dict get $segment $signal cur_index]
-
+              
               set before_pin [lindex [dict get $signal_breaks $signal] 0]
               set after_pin [lindex [dict get $signal_breaks $signal] 1]
-
+             
               dict set segment breaker $signal $cur_index $name [list before_pin $before_pin after_pin $after_pin]
               set cur_index [expr $cur_index + 1]
-
+              
               dict set segment $signal cur_index $cur_index
               set pad_segment($signal,$cur_index) {}
             } else {
@@ -794,16 +1016,21 @@ namespace eval ICeWall {
               if {[dict exists $library cells $cell connect $signal]} {
                 set pin_name [dict get $library cells $cell connect $signal]
               }
-              lappend pad_segment($signal,[dict get $segment $signal cur_index]) [list inst_name $name pin_name $pin_name]
+              # debug "Adding inst_name $name pin_name $pin_name"
+              # Dont add breakers into netlist, as they are physical_only
+              # lappend pad_segment($signal,[dict get $segment $signal cur_index]) [list inst_name $name pin_name $pin_name]
             }
           }
         } else {
           foreach signal [dict get $library connect_by_abutment] {
             set cell [dict get $library types $type]
+            if {$type == "fill"} {continue} 
+            if {$type == "corner"} {continue} 
             set pin_name $signal
             if {[dict exists $library cells $cell connect $signal]} {
               set pin_name [dict get $library cells $cell connect $signal]
             }
+            # debug "Adding inst_name $name pin_name $pin_name"
             lappend pad_segment($signal,[dict get $segment $signal cur_index]) [list inst_name $name pin_name $pin_name]
           }
         }
@@ -832,6 +1059,8 @@ namespace eval ICeWall {
             set net [odb::dbNet_create $block "${signal}_$section"]
           }
           $net setSpecial
+          set swire [odb::dbSWire_create $net "FIXED"]
+
           foreach inst_pin_name [dict get $sections $section] {
             set inst_name [dict get $inst_pin_name inst_name]
             set pin_name [dict get $inst_pin_name pin_name]
@@ -851,44 +1080,46 @@ namespace eval ICeWall {
         }
       }
 
-      dict for {signal breakers} [dict get $segment breaker] {
-        foreach section [dict keys $breakers] {
-          set inst_name [dict keys [dict get $breakers $section]]
-          # debug "signal: $signal, section: $section, inst: $inst_name"
-          if {[set inst [$block findInst $inst_name]] == "NULL"} {
-            critical 15 "Cannot find breaker cell $inst_name"
-          }
-          
-          if {[set before_net [$block findNet "${signal}_$section"]] == "NULL"} { 
-            set before_net [odb::dbNet_create $block "${signal}_$section"]
-            $before_net setSpecial
-          }
-          set before_pin [[$inst getMaster] findMTerm [dict get $breakers $section $inst_name before_pin]]
-          if {$before_pin == "NULL"} {
-            # debug "Cannot find pin [dict get  $breakers $section $inst_name before_pin] on $inst_name ([[$inst getMaster] getName])"
-          } else {
-            set iterm [odb::dbITerm_connect $inst $before_net $before_pin]
-            $iterm setSpecial
-          }
-          
-          # Loop back to zero if we run out of sections
-          set section_id [expr $section + 1]
-          if {![dict exists $segment cells $signal $section_id]} {
-            set section_id 0
-          }
-          if {[set after_net [$block findNet "${signal}_$section_id"]] == "NULL"} { 
-            set after_net [odb::dbNet_create $block "${signal}_$section_id"]
-            $after_net setSpecial
-          }
-          set after_pin  [[$inst getMaster] findMTerm [dict get $breakers $section $inst_name after_pin]]
-          if {$after_pin == "NULL"} {
-            # debug "Cannot find pin [dict get  $breakers $section $inst_name after_pin] on $inst_name ([[$inst getMaster] getName])"
-          } else {
-            set iterm [odb::dbITerm_connect $inst $after_net  $after_pin]
-            $iterm setSpecial
-          }
-        }
-      }
+      # if {[dict exists $segment breaker]} {
+      #   dict for {signal breakers} [dict get $segment breaker] {
+      #     foreach section [dict keys $breakers] {
+      #       set inst_name [dict keys [dict get $breakers $section]]
+      #       # debug "signal: $signal, section: $section, inst: $inst_name"
+      #       if {[set inst [$block findInst $inst_name]] == "NULL"} {
+      #         critical 15 "Cannot find breaker cell $inst_name"
+      #       }
+      #     
+      #       if {[set before_net [$block findNet "${signal}_$section"]] == "NULL"} { 
+      #         set before_net [odb::dbNet_create $block "${signal}_$section"]
+      #         $before_net setSpecial
+      #       }
+      #       set before_pin [[$inst getMaster] findMTerm [dict get $breakers $section $inst_name before_pin]]
+      #       if {$before_pin == "NULL"} {
+      #         # debug "Cannot find pin [dict get  $breakers $section $inst_name before_pin] on $inst_name ([[$inst getMaster] getName])"
+      #       } else {
+      #         set iterm [odb::dbITerm_connect $inst $before_net $before_pin]
+      #         $iterm setSpecial
+      #       }
+      #     
+      #       # Loop back to zero if we run out of sections
+      #       set section_id [expr $section + 1]
+      #       if {![dict exists $segment cells $signal $section_id]} {
+      #         set section_id 0
+      #       }
+      #       if {[set after_net [$block findNet "${signal}_$section_id"]] == "NULL"} { 
+      #         set after_net [odb::dbNet_create $block "${signal}_$section_id"]
+      #         $after_net setSpecial
+      #       }
+      #       set after_pin  [[$inst getMaster] findMTerm [dict get $breakers $section $inst_name after_pin]]
+      #       if {$after_pin == "NULL"} {
+      #         # debug "Cannot find pin [dict get  $breakers $section $inst_name after_pin] on $inst_name ([[$inst getMaster] getName])"
+      #       } else {
+      #         set iterm [odb::dbITerm_connect $inst $after_net  $after_pin]
+      #         $iterm setSpecial
+      #       }
+      #     }
+      #   }
+      # }
     }
   }
   
@@ -904,15 +1135,13 @@ namespace eval ICeWall {
     namespace eval pad_inst {}
     # Evaluate all the parameters for all padcell instances
     foreach padcell [dict get $footprint full_order] {
-      set side [dict get $footprint side $padcell]
       # debug "padcell - [dict get $footprint padcells $side $padcell]"
-      set type [dict get $footprint padcells $side $padcell type]
+      set type [get_padcell_type $padcell]
       set library_element [dict get $library types $type]
       set library_cell [dict get $library cells $library_element]
 
       namespace eval "pad_inst_values::$padcell" {}
       if {$type == "sig"} {
-        set "pad_inst_values::${padcell}::signal" [dict get $footprint padcells $side $padcell name]
       }
       
       if {[dict exists $library_cell default_parameters]} {
@@ -935,21 +1164,18 @@ namespace eval ICeWall {
     normalize_locations
     order_padcells
     connect_by_abutment
-    fill_between_padcells
+    place_padring
+    if {[dict get $footprint type] == "wirebond"} {
+      place_bondpads
+    } elseif {[dict get $footpring type] == "flipchip"} {
+      place_bumps
+    }
     global_assignments  
 
     # Place miscellaneous other cells
     place_additional_cells
   }
   
-  proc get_cell_master {name} {
-    variable db
-
-    if {[set cell [$db findMaster $name]] != "NULL"} {return $cell}
-    
-    critical 8 "Cannot find cell $name in the database"
-  }
-
   proc add_cell {type name sides} {
     variable cells
     variable default_orientation 
@@ -973,24 +1199,6 @@ namespace eval ICeWall {
     dict set $library cells $name $position orient $orient
   }
 
-  proc get_cell_orientation {name position} {
-    variable library 
-    
-    return [dict get $library cells $name orient $position]
-  }
-
-  proc get_cell {type {side "none"}} {
-    variable library 
-
-    set type_name [dict get $library types $type]
-    
-    if {[dict exists $library cells $type_name cell_name]} {
-      return [get_cell_master [dict get $library cells $type_name cell_name $side]]
-    } else {
-      return [get_cell_master $type_name]
-    }
-  }
-
   proc is_physical_only {type} {
     variable library 
     
@@ -1003,20 +1211,6 @@ namespace eval ICeWall {
     return 0
   }
   
-  proc get_cells {type side} {
-    variable library 
-
-    set cell_list {}
-    foreach type_name [dict get $library types $type] {
-      if {[dict exists $library cells $type_name cell_name]} {
-        dict set cell_list $type_name master [get_cell_master [dict get $library cells $type_name cell_name $side]]
-      } else {
-        dict set cell_list $type_name master [get_cell_master $type_name]
-      }
-    }
-    return $cell_list
-  }
-
   proc set_pad_order {cell_type_order sides} {
     variable order
     foreach side $sides {
@@ -1209,21 +1403,58 @@ namespace eval ICeWall {
       $inst setOrient $orient
       $inst setPlacementStatus "FIRM"
 
-      connect_abutment_nets $inst $abutment_nets
+      # connect_abutment_nets $inst $abutment_nets
 
       dict incr idx $type
     }
   }
 
-  proc get_die_area {} {
-    variable footprint
+  proc stash_bondpads {file_name} {
+    variable library
+
+    set bondpad_cell_type [dict get $library types bondpad]
+    if {[dict exists $library cells $bondpad_cell_type] && [dict exists $library cells $bondpad_cell_type cell_name]} {
+      set bondpad_cell_names {}
+      dict for {side_name bondpad_cell_name} [dict get $library cells $bondpad_cell_type bondpad_cell_name] {
+        lappend bondpad_cell_names $bondpad_cell_name
+      }
+      set bondpad_cell_names [lsort -unique $bondpad_cell_names]
+    } else {
+      set bondpad_cell_names $bondpad_cell_type
+    }
     
-    return [dict get $footprint die_area]
+    set db [ord::get_db]
+    set block [ord::get_db_block]
+
+    set stash [open $file_name "w"]
+    puts $stash "set db \[ord::get_db\]"
+    puts $stash "set block \[ord::get_db_block\]"
+    puts $stash ""
+    foreach bondpad_cell_name $bondpad_cell_names {
+      puts $stash "set bondpad \[\$db findMaster $bondpad_cell_name\]"
+      puts $stash ""
+
+      foreach inst [$block getInsts] {
+        if {[[$inst getMaster] getName] == $bondpad_cell_name} {
+          puts $stash "set inst \[odb::dbInst_create \$block \$bondpad [$inst getName]\]"
+          puts $stash "\$inst setOrigin [$inst getOrigin]"
+          puts $stash "\$inst setOrient [$inst getOrient]"
+          puts $stash "\$inst setPlacementStatus \"FIRM\""
+          puts $stash ""
+
+          odb::dbInst_destroy $inst
+        }
+      }
+    }
+
+    close $stash
   }
+  
   namespace export set_inner_offset
   namespace export add_cell 
   namespace export set_pad_order set_offsets set_block
   namespace export init_footprint set_cell_orientation load_footprint
+  namespace export stash_bondpads
 
   namespace export get_die_area get_core_area get_tracks set_footprint set_library
   
